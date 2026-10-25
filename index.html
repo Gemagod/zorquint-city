@@ -1,76 +1,1016 @@
-
 <!DOCTYPE html>
-<html lang="mr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZORQUINT AI Image Studio</title>
+<title>SIGNAL/NOISE — Mara Voss · Tech, Judged.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#0b1020;color:#fff;font-family:Arial,sans-serif}
-header{padding:22px;text-align:center;background:#141b32;border-bottom:1px solid #34405f}
-header h1{margin:0;color:#8b9cff;font-size:28px}
-header p{color:#b9c2df}
-main{max-width:850px;margin:25px auto;padding:16px}
-.panel{background:#151d35;padding:22px;border:1px solid #34405f;border-radius:18px}
-label{display:block;margin:18px 0 8px;font-weight:bold}
-textarea,select,input{width:100%;padding:14px;border-radius:10px;border:1px solid #485575;background:#0b1020;color:white;font-size:16px}
-textarea{min-height:110px;resize:vertical}
-button{width:100%;padding:15px;margin-top:16px;border:0;border-radius:10px;background:#697cff;color:white;font-size:17px;font-weight:bold}
-button:active{transform:scale(.99)}
-#preview{margin-top:22px;min-height:180px;border:1px dashed #586586;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;padding:15px;color:#b9c2df;overflow:hidden}
-#preview img{max-width:100%;height:auto;border-radius:10px}
-.note{font-size:13px;color:#b9c2df;line-height:1.6}
-footer{text-align:center;color:#98a5c9;padding:25px}
+/* ============ TOKENS ============ */
+@property --accent{syntax:'<color>';inherits:true;initial-value:#ff2a1f;}
+@property --accent-ink{syntax:'<color>';inherits:true;initial-value:#060606;}
+:root{
+  --bg:#060606; --panel:#0b0b0b; --white:#f4f3ee; --mut:#8b8b85;
+  --line:rgba(244,243,238,.16); --line2:rgba(244,243,238,.08);
+  --red:#ff2a1f; --yel:#e8ff17; --blu:#2b5bff;
+  --fd:'Anton',sans-serif; --fb:'Space Grotesk',sans-serif; --fm:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;transition:--accent .7s ease,--accent-ink .7s ease;scrollbar-color:var(--accent) #0a0a0a}
+body{background:var(--bg);color:var(--white);font-family:var(--fb);font-size:16px;line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--accent);color:var(--accent-ink)}
+::-webkit-scrollbar{width:9px}::-webkit-scrollbar-track{background:#0a0a0a}::-webkit-scrollbar-thumb{background:var(--accent)}
+img{display:block;max-width:100%}
+button{font:inherit;color:inherit;background:none;border:0}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.mono{font-family:var(--fm);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.wrap{width:min(1440px,92vw);margin-inline:auto}
+section{padding:110px 0;scroll-margin-top:70px;position:relative}
+
+/* ============ FILM GRAIN ============ */
+body::after{content:"";position:fixed;top:-60%;left:-60%;width:220%;height:220%;z-index:2000;pointer-events:none;opacity:.08;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+  animation:grain .8s steps(4) infinite}
+@keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-2%)}80%{transform:translate(3%,2%)}100%{transform:translate(0,0)}}
+
+/* ============ NAV ============ */
+#prog{position:fixed;top:0;left:0;height:2px;width:0;background:var(--accent);z-index:950}
+#nav{position:fixed;inset:0 0 auto;z-index:900;display:flex;align-items:center;gap:2.2rem;height:64px;padding-inline:4vw;background:rgba(6,6,6,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line2)}
+.wordmark{font-weight:700;letter-spacing:.06em;font-size:17px}
+.wordmark b{color:var(--accent)}
+#nav nav{display:flex;gap:1.8rem;margin-left:auto}
+#nav nav a{font-family:var(--fm);font-size:11px;letter-spacing:.14em;color:var(--mut);padding:6px 2px;border-bottom:1px solid transparent;transition:.25s}
+#nav nav a:hover{color:var(--white)}
+#nav nav a.on{color:var(--accent);border-color:var(--accent)}
+.subs{font-family:var(--fm);font-size:11px;letter-spacing:.12em;color:var(--mut)}
+#subBtn{font-family:var(--fm);font-size:11px;letter-spacing:.14em;background:var(--accent);color:var(--accent-ink);padding:9px 16px;transition:filter .2s}
+#subBtn:hover{filter:brightness(1.12)}
+
+/* ============ CUSTOM CURSOR ============ */
+#cur{position:fixed;top:0;left:0;z-index:3000;pointer-events:none;opacity:0;transition:opacity .3s}
+#cur .dot{position:absolute;width:10px;height:10px;background:var(--accent);border:1px solid transparent;transform:translate(-50%,-50%);transition:width .25s var(--ease),height .25s var(--ease),background .25s,border-color .25s}
+#cur.mid .dot{width:34px;height:34px;background:transparent;border-color:var(--accent)}
+#cur.big .dot{width:66px;height:66px;background:rgba(6,6,6,.2);border-color:var(--accent)}
+#cur.down .dot{width:8px;height:8px}
+#curLbl{position:absolute;transform:translate(-50%,-50%);font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:var(--accent);opacity:0;transition:.2s;white-space:nowrap}
+#cur.big #curLbl{opacity:1}
+@media (pointer:fine){body,a,button,label,input[type=range]{cursor:none}}
+@media (pointer:coarse){#cur{display:none}}
+
+/* ============ PLAYER / THUMBNAIL SYSTEM (broadcast OSD) ============ */
+.player{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden;border:1px solid var(--line)}
+.player>img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.28) brightness(.9);transition:transform 1.2s var(--ease)}
+.player.playing>img{transform:scale(1.09) translate(1.4%,-1%);transition:transform 9s linear}
+.vcard:nth-child(even).playing>img{transform:scale(1.07) translate(-1.4%,1%)}
+.tint{position:absolute;inset:0;background:var(--accent);mix-blend-mode:multiply;opacity:.5;transition:opacity .5s}
+.player.playing .tint{opacity:.14}
+.scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px);opacity:0;transition:opacity .4s}
+.player.playing .scan{opacity:.55}
+.cnr{position:absolute;width:16px;height:16px;border:0 solid var(--white);opacity:0;transition:all .35s var(--ease);z-index:3}
+.cnr.c1{top:10px;left:10px;border-top-width:1px;border-left-width:1px}
+.cnr.c2{top:10px;right:10px;border-top-width:1px;border-right-width:1px}
+.cnr.c3{bottom:10px;left:10px;border-bottom-width:1px;border-left-width:1px}
+.cnr.c4{bottom:10px;right:10px;border-bottom-width:1px;border-right-width:1px}
+.player.playing .cnr{opacity:1;width:26px;height:26px}
+.player.playing .c1{top:18px;left:18px}.player.playing .c2{top:18px;right:18px}
+.player.playing .c3{bottom:18px;left:18px}.player.playing .c4{bottom:18px;right:18px}
+.osd{position:absolute;top:12px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:flex-start;z-index:4;pointer-events:none}
+.osd-b{position:absolute;bottom:12px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:flex-end;z-index:4;pointer-events:none}
+.osd-left{display:flex;gap:8px;align-items:flex-end}
+.osd-chip{font-family:var(--fm);font-size:10px;letter-spacing:.14em;text-transform:uppercase;background:rgba(0,0,0,.74);color:var(--white);padding:6px 9px;display:inline-flex;align-items:center;gap:7px}
+.osd-chip .i{width:10px;height:10px}
+.player .o{opacity:0;transform:translateY(-4px);transition:.3s}
+.osd-b .o{transform:translateY(4px)}
+.player.playing .o{opacity:1;transform:none}
+.rec{width:7px;height:7px;background:var(--red);display:inline-block;animation:blink 1.1s steps(2) infinite}
+@keyframes blink{50%{opacity:.15}}
+.eq{display:flex;gap:3px;align-items:flex-end;height:18px;opacity:0;transition:.3s}
+.player.playing .eq{opacity:1}
+.eq span{width:3px;height:20%;background:var(--accent)}
+.player.playing .eq span{animation:eq .7s ease-in-out infinite alternate}
+.player.playing .eq span:nth-child(1){animation-duration:.5s}
+.player.playing .eq span:nth-child(2){animation-duration:.85s;animation-delay:.12s}
+.player.playing .eq span:nth-child(3){animation-duration:.65s;animation-delay:.05s}
+.player.playing .eq span:nth-child(4){animation-duration:.95s;animation-delay:.2s}
+@keyframes eq{from{height:18%}to{height:100%}}
+.playglyph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;border:1px solid rgba(255,255,255,.85);background:rgba(0,0,0,.5);display:grid;place-items:center;opacity:0;transition:.3s;z-index:4;pointer-events:none}
+.playglyph svg{width:20px;height:20px;fill:var(--white)}
+.player.playing .playglyph{opacity:1}
+.pbar{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--accent);z-index:5}
+.hint-chip{position:absolute;left:14px;bottom:12px;z-index:4;font-family:var(--fm);font-size:10px;letter-spacing:.14em;background:rgba(0,0,0,.74);padding:6px 9px;color:var(--white);transition:.3s}
+.player.playing .hint-chip{opacity:0}
+@keyframes flash{0%{box-shadow:inset 0 0 0 2px var(--accent)}100%{box-shadow:inset 0 0 0 0 transparent}}
+.player.flash{animation:flash .7s ease-out}
+
+/* ============ HERO ============ */
+#hero{padding:150px 0 80px}
+.hero-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:2.2rem;color:var(--mut)}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);padding:7px 12px;color:var(--white)}
+.hero-title{position:relative;z-index:2;font-family:var(--fd);font-weight:400;font-size:clamp(3rem,9vw,8.2rem);line-height:.94;text-transform:uppercase;letter-spacing:.005em;margin-bottom:-1.4rem;pointer-events:none}
+.hero-title .stroke{color:transparent;-webkit-text-stroke:2px var(--white)}
+.hero-title em{font-style:normal;color:var(--accent)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);gap:3.5rem;align-items:end}
+.hero-side .dek{font-size:1.13rem;color:#c9c8c1;max-width:46ch}
+.hero-cta{display:flex;gap:.9rem;margin:1.8rem 0 2rem;flex-wrap:wrap}
+.btn{font-family:var(--fm);font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:14px 22px;display:inline-flex;align-items:center;gap:10px;transition:.25s;border:1px solid var(--white)}
+.btn .i{width:11px;height:11px}
+.btn-solid{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn-solid:hover{filter:brightness(1.12)}
+.btn-ghost{border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.meta-list{list-style:none;border-top:1px solid var(--line);color:var(--mut)}
+.meta-list li{display:flex;justify-content:space-between;gap:1rem;padding:10px 0;border-bottom:1px solid var(--line2)}
+.meta-list li span:last-child{color:var(--white);text-align:right}
+.hero-foot{margin-top:3.4rem;padding-top:1.2rem;border-top:1px solid var(--line2);color:#5c5c57;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+
+/* ============ TICKER ============ */
+.ticker{overflow:hidden;border-block:1px solid var(--line);padding:13px 0}
+.tick-track{display:flex;gap:3rem;width:max-content;animation:mq 32s linear infinite}
+.ticker:hover .tick-track{animation-play-state:paused}
+.tick-track span{font-family:var(--fm);font-size:11px;letter-spacing:.14em;color:var(--mut);white-space:nowrap;text-transform:uppercase}
+.tick-track i{color:var(--accent);font-style:normal;font-family:var(--fm);font-size:11px}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* ============ SECTION HEADS ============ */
+.sec-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1.6rem;margin-bottom:3.4rem}
+.kicker{display:flex;align-items:center;gap:12px;color:var(--mut);margin-bottom:1.1rem}
+.kicker i{width:10px;height:10px;background:var(--accent);display:inline-block}
+.sec-head h2{font-family:var(--fd);font-weight:400;font-size:clamp(2.4rem,5.4vw,4.6rem);line-height:.95;text-transform:uppercase}
+.sec-head h2 b{color:var(--accent);font-weight:400}
+.sec-sub{max-width:46ch;color:var(--mut);font-size:1rem;padding-bottom:6px}
+
+/* ============ OPERATOR ============ */
+.op-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:2.4rem 2rem}
+.portrait{grid-column:1/5;grid-row:1/3}
+.portrait .ph{aspect-ratio:4/5;position:relative;overflow:hidden;border:1px solid var(--line)}
+.portrait .ph img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.3) brightness(.9)}
+.portrait .ph .tint{opacity:.45}
+.op-quote{grid-column:6/13;font-family:var(--fd);font-weight:400;font-size:clamp(1.9rem,3.6vw,3.3rem);line-height:1.04;text-transform:uppercase}
+.op-quote em{font-style:normal;color:var(--accent)}
+.op-body{grid-column:6/13;color:#b9b8b1;font-size:1.05rem;max-width:58ch;display:grid;gap:1rem;margin-top:1.6rem}
+.figcap{font-family:var(--fm);font-size:10px;letter-spacing:.12em;color:var(--mut);margin-top:10px;text-transform:uppercase}
+.stats{grid-column:1/13;display:grid;grid-template-columns:repeat(4,1fr);border-block:1px solid var(--line);margin-top:3.5rem}
+.stat{padding:1.6rem 1.4rem;border-left:1px solid var(--line2)}
+.stat:first-child{border-left:0}
+.stat b{font-family:var(--fd);font-weight:400;font-size:clamp(2rem,3.4vw,3.2rem);display:block;color:var(--accent);line-height:1.1}
+.stat span{color:var(--mut);font-family:var(--fm);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.bts{grid-column:1/13;display:grid;grid-template-columns:repeat(12,1fr);gap:2rem;margin-top:3rem;align-items:end}
+.bts figure:nth-child(1){grid-column:1/8}
+.bts figure:nth-child(2){grid-column:9/13}
+.bts .ph{aspect-ratio:16/9;position:relative;overflow:hidden;border:1px solid var(--line2)}
+.bts figure:nth-child(2) .ph{aspect-ratio:1/1}
+.bts .ph img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.3) brightness(.85)}
+.bts .ph .tint{opacity:.4}
+
+/* ============ LIBRARY ============ */
+.filters{display:flex;flex-wrap:wrap;gap:.4rem 1.6rem;border-top:1px solid var(--line);padding-top:1.2rem}
+.filters button{font-family:var(--fm);font-size:11px;letter-spacing:.14em;color:var(--mut);padding:8px 2px;border-bottom:1px solid transparent;transition:.25s;text-transform:uppercase}
+.filters button sup{color:#5f5f5a;margin-left:5px;font-size:9px}
+.filters button:hover{color:var(--white)}
+.filters button.on{color:var(--accent);border-color:var(--accent)}
+.filters button.on sup{color:var(--accent)}
+#vgrid{display:grid;grid-template-columns:repeat(12,1fr);gap:2.6rem 2rem;grid-auto-flow:dense;grid-auto-rows:min-content}
+.vcard{grid-column:span 3}
+.vcard.is-featured{grid-column:span 6}
+.vcard.is-hidden{display:none}
+.vcard .thumb{cursor:pointer}
+.vmeta{padding-top:1rem}
+.vmeta .row1{display:flex;gap:1.1rem;color:var(--mut)}
+.vmeta .row1 .ep{color:var(--accent)}
+.vmeta h3{font-size:1.05rem;font-weight:700;line-height:1.32;margin:.55rem 0 .5rem;transition:color .25s}
+.vcard:hover h3{color:var(--accent)}
+.vcard.is-featured h3{font-family:var(--fd);font-weight:400;font-size:clamp(1.4rem,2vw,1.9rem);line-height:1.05;text-transform:uppercase}
+.vmeta .row2{display:flex;gap:1.3rem;color:#6f6f6a;align-items:center;flex-wrap:wrap}
+.companion{color:var(--accent);display:inline-flex;align-items:center;gap:6px;font-family:var(--fm);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.companion .i{width:10px;height:10px}
+.companion:hover{text-decoration:underline}
+
+/* ============ REVIEWS ============ */
+.rev-tabs{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);margin-bottom:3.2rem}
+.rev-tabs button{text-align:left;padding:18px 20px;display:flex;gap:14px;align-items:baseline;border-right:1px solid var(--line);transition:.25s;color:var(--mut)}
+.rev-tabs button:last-child{border-right:0}
+.rev-tabs button i{font-family:var(--fm);font-style:normal;font-size:11px;color:#5f5f5a;flex:none}
+.rev-tabs button span{font-weight:700;font-size:.98rem;line-height:1.3}
+.rev-tabs button small{display:block;font-family:var(--fm);font-weight:400;font-size:10px;letter-spacing:.12em;color:#5f5f5a;margin-top:5px;text-transform:uppercase}
+.rev-tabs button.on{background:var(--accent);color:var(--accent-ink)}
+.rev-tabs button.on i,.rev-tabs button.on small{color:var(--accent-ink);opacity:.65}
+.rev-tabs button:not(.on):hover{color:var(--white);background:rgba(255,255,255,.03)}
+.rev-layout{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:3.4rem;align-items:start}
+.rev-left{position:sticky;top:96px}
+.transport{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-top:0;padding:12px 14px;background:var(--panel)}
+.tbtn{width:34px;height:34px;border:1px solid var(--line);display:grid;place-items:center;transition:.2s;flex:none}
+.tbtn:hover{border-color:var(--accent);color:var(--accent)}
+.tbtn svg{width:12px;height:12px;fill:currentColor}
+.tclock{font-family:var(--fm);font-size:11px;color:var(--mut);letter-spacing:.08em;flex:none;min-width:96px;text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;background:rgba(244,243,238,.22);outline-offset:6px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--accent);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--accent)}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:0;background:var(--accent);border:0;box-shadow:0 0 0 1px var(--accent)}
+.rev-hint{margin-top:12px;color:#5f5f5a}
+.rev-right .rmeta{color:var(--mut);display:flex;gap:1.4rem;margin-bottom:1rem;flex-wrap:wrap}
+.rev-right h3{font-family:var(--fd);font-weight:400;font-size:clamp(1.8rem,3vw,2.8rem);line-height:1;text-transform:uppercase;margin-bottom:1rem}
+.rev-right h3 b{color:var(--accent);font-weight:400}
+.rev-dek{color:#b9b8b1;font-size:1.08rem;max-width:60ch;margin-bottom:2.2rem;padding-bottom:1.8rem;border-bottom:1px solid var(--line)}
+.rblock{position:relative;padding:2px 0 2px 18px;margin-bottom:1.15rem;color:#c9c8c1;transition:.3s;border-left:2px solid transparent;cursor:pointer}
+.rblock:hover{color:var(--white)}
+.rblock.active{border-color:var(--accent);color:var(--white)}
+.tstamp{font-family:var(--fm);font-size:11px;letter-spacing:.1em;color:var(--accent);border:1px solid transparent;padding:2px 7px;margin-right:10px;background:rgba(255,255,255,.05);transition:.2s;vertical-align:1px}
+.tstamp:hover{border-color:var(--accent)}
+.rblock.active .tstamp{background:var(--accent);color:var(--accent-ink)}
+.rblock .hl{color:var(--white);font-weight:700}
+.rblock .num{font-family:var(--fm);font-size:.9em;color:var(--accent)}
+
+/* ============ GUIDES ============ */
+.guide-layout{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:3.4rem;align-items:start}
+.g-left{position:sticky;top:96px}
+.g-lab{color:var(--mut)}
+.g-num{font-family:var(--fd);font-size:clamp(3.4rem,6vw,5.6rem);line-height:1;color:var(--accent);margin:.4rem 0 1.4rem}
+.scale-row{display:flex;justify-content:space-between;color:#5f5f5a;margin-top:10px}
+.pick-panel{margin-top:2.6rem;border:1px solid var(--line);padding:1.6rem;background:var(--panel)}
+.pick-k{display:flex;align-items:center;gap:8px;color:var(--accent)}
+.pick-k::before{content:"";width:8px;height:8px;background:var(--accent)}
+.pick-name{font-weight:700;font-size:1.5rem;line-height:1.15;margin:.9rem 0 .6rem}
+.pick-row{display:flex;gap:1.4rem;align-items:baseline;color:var(--mut)}
+.pick-score{font-family:var(--fd);font-size:2.6rem;color:var(--accent);line-height:1}
+.pick-why{color:#b9b8b1;margin:.9rem 0 1.2rem;font-size:.98rem}
+.pick-foot{border-top:1px solid var(--line2);padding-top:1rem;display:grid;gap:7px;color:#8b8b85}
+.unlock{color:var(--accent)}
+.g-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.gcard{position:relative;border:1px solid var(--line2);padding:1.4rem;background:var(--panel);transition:border-color .3s,opacity .3s;cursor:pointer}
+.gcard:hover{border-color:var(--line)}
+.gcard h4{font-size:1.08rem;font-weight:700;line-height:1.25}
+.g-top{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}
+.gcard .score{font-family:var(--fd);font-size:1.9rem;line-height:1}
+.gcard.ispick{border-color:var(--accent)}
+.gcard.ispick .score{color:var(--accent)}
+.g-mid{display:flex;justify-content:space-between;color:var(--mut);margin:.7rem 0 .8rem}
+.g-why{color:#b3b2ab;font-size:.95rem}
+.over-chip{display:none;border:1px solid var(--mut);color:var(--mut);padding:4px 8px;margin-top:.8rem}
+.gcard.over{opacity:.32}
+.gcard.over .over-chip{display:inline-block}
+.g-more{overflow:hidden;max-height:0;transition:max-height .4s var(--ease),margin .4s;color:#8b8b85;font-size:.9rem}
+.g-more p{padding-top:.8rem}
+.gcard.open .g-more{max-height:220px}
+.pick-stamp{position:absolute;top:-1px;right:-1px;background:var(--accent);color:var(--accent-ink);padding:5px 10px;font-family:var(--fm);font-size:10px;letter-spacing:.14em;display:none}
+.gcard.ispick .pick-stamp{display:block}
+
+/* ============ SIGNALS ============ */
+.sig-grid{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:3.4rem;align-items:start}
+.news h3{font-family:var(--fd);font-weight:400;font-size:clamp(2rem,4vw,3.4rem);line-height:.98;text-transform:uppercase;margin-bottom:1.4rem}
+.news h3 b{color:var(--accent);font-weight:400}
+.news .lead{color:#b9b8b1;max-width:52ch;margin-bottom:2rem}
+.nl-lab{color:var(--mut);display:block;margin-bottom:.7rem}
+.nl-form{display:flex;border:1px solid var(--line);background:var(--panel)}
+.nl-form input{flex:1;min-width:0;background:none;border:0;color:var(--white);padding:18px;font-family:var(--fm);font-size:12px;letter-spacing:.08em;outline:none;cursor:text}
+.nl-form input::placeholder{color:#63635e}
+.nl-form button{background:var(--accent);color:var(--accent-ink);font-family:var(--fm);font-size:11px;letter-spacing:.14em;padding:0 26px;display:flex;align-items:center;gap:10px;transition:filter .2s;flex:none}
+.nl-form button:hover{filter:brightness(1.12)}
+.nl-err{color:var(--red);font-family:var(--fm);font-size:11px;letter-spacing:.1em;margin-top:10px;min-height:16px;text-transform:uppercase}
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.nl-meta{display:flex;gap:1.6rem;color:#6f6f6a;margin-top:1.2rem;flex-wrap:wrap}
+.nl-note{display:flex;gap:14px;align-items:center;margin-top:2.4rem;border-top:1px solid var(--line2);padding-top:1.6rem;color:var(--mut);font-size:.95rem}
+.nl-note img{width:44px;height:44px;object-fit:cover;filter:grayscale(1) contrast(1.2);border:1px solid var(--line)}
+.subbed{font-family:var(--fm);font-size:12px;letter-spacing:.12em;color:var(--accent);padding:20px;border:1px solid var(--accent);text-transform:uppercase}
+.subbed span{display:block;color:var(--mut);margin-top:8px}
+.patreon{border:1px solid var(--line)}
+.pat-head{padding:1.8rem;border-bottom:1px solid var(--line)}
+.pat-head .mono{color:var(--accent)}
+.pat-head h3{font-family:var(--fd);font-weight:400;font-size:2.2rem;text-transform:uppercase;margin-top:.5rem}
+.pat-head p{color:var(--mut);font-size:.95rem;margin-top:.4rem}
+.tier{display:flex;gap:1.4rem;align-items:center;padding:1.3rem 1.8rem;border-bottom:1px solid var(--line2);transition:background .25s;cursor:pointer;width:100%;text-align:left}
+.tier:hover{background:rgba(255,255,255,.03)}
+.tier b{font-family:var(--fm);font-size:13px;color:var(--accent);min-width:52px;font-weight:500}
+.tier div{flex:1}
+.tier strong{display:block;font-size:1rem}
+.tier span{color:var(--mut);font-size:.9rem}
+.tier svg{width:14px;height:14px;flex:none;stroke:var(--mut);fill:none;stroke-width:2}
+.pat-foot{padding:1.6rem 1.8rem}
+
+/* ============ FOOTER ============ */
+footer{border-top:1px solid var(--line);padding:70px 0 40px}
+.f-mark{font-family:var(--fd);font-weight:400;font-size:clamp(3rem,9vw,8rem);line-height:.95;text-transform:uppercase;color:transparent;-webkit-text-stroke:1.5px rgba(244,243,238,.35)}
+.f-mark b{-webkit-text-stroke:0;color:var(--accent)}
+.f-row{display:flex;justify-content:space-between;gap:1.4rem;flex-wrap:wrap;color:#5f5f5a;margin-top:2.4rem;padding-top:1.4rem;border-top:1px solid var(--line2)}
+.f-row a:hover{color:var(--accent)}
+
+/* ============ TOASTS ============ */
+#toasts{position:fixed;left:20px;bottom:20px;z-index:2400;display:grid;gap:10px}
+.toast{background:#0d0d0d;border:1px solid var(--line);border-left:3px solid var(--accent);padding:14px 18px;font-family:var(--fm);font-size:11px;letter-spacing:.1em;max-width:340px;transform:translateY(12px);opacity:0;transition:.35s var(--ease);text-transform:uppercase}
+.toast.on{transform:none;opacity:1}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:1100px){
+  .vcard,.vcard.is-featured{grid-column:span 6}
+  .hero-grid{grid-template-columns:1fr;align-items:start}
+  .rev-layout,.guide-layout,.sig-grid{grid-template-columns:1fr}
+  .rev-left,.g-left{position:static}
+  .portrait{grid-column:1/13;grid-row:auto;max-width:420px}
+  .op-quote,.op-body{grid-column:1/13}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stat:nth-child(odd){border-left:0}
+  .bts figure:nth-child(1){grid-column:1/13}
+  .bts figure:nth-child(2){grid-column:1/13;max-width:420px}
+}
+@media(max-width:680px){
+  #nav nav,.subs{display:none}
+  .vcard,.vcard.is-featured{grid-column:span 12}
+  .g-grid{grid-template-columns:1fr}
+  .rev-tabs{grid-template-columns:1fr}
+  .rev-tabs button{border-right:0;border-bottom:1px solid var(--line)}
+  .nl-form{flex-direction:column}
+  .nl-form button{padding:16px;justify-content:center}
+  section{padding:80px 0}
+  #hero{padding-top:120px}
+  .hero-title{margin-bottom:1.2rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+}
 </style>
 </head>
-<body>
-<header>
-<h1>✦ ZORQUINT AI</h1>
-<p>AI Image Studio · कल्पनेतून चित्र तयार करा</p>
+<body id="top">
+
+<div id="prog"></div>
+<div id="cur"><span class="dot"></span><span id="curLbl"></span></div>
+
+<header id="nav">
+  <a class="wordmark" href="#top">SIGNAL<b>/</b>NOISE</a>
+  <nav>
+    <a href="#library">LIBRARY</a>
+    <a href="#reviews">REVIEWS</a>
+    <a href="#guides">BUY GUIDES</a>
+    <a href="#signals">SIGNALS</a>
+  </nav>
+  <span class="subs">1.24M SUBS</span>
+  <button id="subBtn">SUBSCRIBE</button>
 </header>
+
 <main>
-<div class="panel">
-<h2>🎨 Create Your Image</h2>
-<label for="prompt">तुमच्या चित्राचं वर्णन लिहा</label>
-<textarea id="prompt" placeholder="उदा. भविष्यकालीन शहर, निळे दिवे, सिनेमॅटिक दृश्य..."></textarea>
-<label for="style">चित्राची शैली</label>
-<select id="style">
-<option>Realistic</option>
-<option>Anime</option>
-<option>3D Art</option>
-<option>Fantasy</option>
-<option>Cinematic</option>
-<option>Digital Painting</option>
-</select>
-<button onclick="makePrompt()">✨ माझा AI Prompt तयार करा</button>
-<div id="preview">तुमचा तयार केलेला Prompt येथे दिसेल.</div>
-<button onclick="copyPrompt()">📋 Prompt कॉपी करा</button>
-<p class="note">टीप: ही पहिली वेबसाइट आवृत्ती Prompt तयार करते. खऱ्या AI चित्रनिर्मितीसाठी image-generation API किंवा जोडलेली AI सेवा आवश्यक आहे. API key वेबसाइटच्या HTML मध्ये उघडपणे ठेवू नका.</p>
-</div>
+  <!-- ================= HERO ================= -->
+  <section id="hero" data-accent="red">
+    <div class="wrap">
+      <div class="hero-top mono">
+        <span class="chip"><i class="rec"></i>LATEST UPLOAD</span>
+        <span>EP.247 · FRI 21:00 CET · KEYBOARDS</span>
+      </div>
+      <h1 class="hero-title">THE $2,000 KEYBOARD<br><span class="stroke">IS A</span> <em>LIE.</em></h1>
+      <div class="hero-grid">
+        <div class="player" id="heroPlayer" data-cursor="PLAY" data-dur="872" style="cursor:pointer">
+          <img src="https://picsum.photos/seed/sn-ep247/1280/720.jpg" alt="EP.247 — The $2,000 Keyboard Is a Lie" loading="eager">
+          <div class="tint"></div><div class="scan"></div>
+          <i class="cnr c1"></i><i class="cnr c2"></i><i class="cnr c3"></i><i class="cnr c4"></i>
+          <div class="osd">
+            <span class="osd-chip o"><i class="rec"></i>PREVIEW</span>
+            <span class="osd-chip o"><svg class="i" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z" fill="currentColor"/><path d="M16.5 9.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>MUTED</span>
+          </div>
+          <div class="osd-b">
+            <div class="osd-left">
+              <div class="eq"><span></span><span></span><span></span><span></span></div>
+              <span class="osd-chip tc o">00:00 / 14:32</span>
+            </div>
+            <span class="osd-chip">14:32</span>
+          </div>
+          <div class="playglyph"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></div>
+          <span class="hint-chip">HOVER TO PREVIEW · SILENT</span>
+          <div class="pbar"></div>
+        </div>
+        <div class="hero-side">
+          <p class="dek">Forty-one switches measured, fourteen cases weighed, one torque spec I still think about. The most expensive keyboard I've ever tested is also the best — and the easiest one to tell you not to buy. Both halves of that sentence get fourteen minutes.</p>
+          <div class="hero-cta">
+            <button class="btn btn-solid" id="watchBtn"><svg class="i" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg>WATCH EPISODE</button>
+            <button class="btn btn-ghost" id="toReview">READ THE COMPANION<svg class="i" viewBox="0 0 24 24"><path d="M12 4v13M6 12l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none"/></svg></button>
+          </div>
+          <ul class="meta-list mono">
+            <li><span>MEASURED</span><span>41 SWITCHES · 104 SPRINGS</span></li>
+            <li><span>WEIGHED</span><span>14 CASES</span></li>
+            <li><span>BENCH TIME</span><span>62 HOURS</span></li>
+            <li><span>SPONSOR INPUT</span><span>NONE, EVER</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="hero-foot mono">
+        <span>51.51°N · 0.13°W — STUDIO B</span>
+        <span>SHOT ON THE BENCH CAM · NO SPONSOR TOUCHED THIS CUT</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="ticker" aria-hidden="true"><div class="tick-track" id="tick">
+    <span>NEXT DROP: A WATER-COOLED TOASTER — YES, REALLY</span><i>//</i>
+    <span>BENCH SHEET #112 LIVE FOR PATRONS</span><i>//</i>
+    <span>EP.248 SHOOTS THURSDAY 09:00</span><i>//</i>
+    <span>POLL: WHICH DAC DIES NEXT — VOTE IN THE CUTTING ROOM</span><i>//</i>
+    <span>ALL BENCH DATA PUBLISHED RAW. ALWAYS.</span><i>//</i>
+  </div></div>
+
+  <!-- ================= OPERATOR ================= -->
+  <section id="operator" data-accent="red">
+    <div class="wrap">
+      <div class="op-grid">
+        <div class="portrait">
+          <div class="ph"><img src="https://picsum.photos/seed/sn-portrait/700/875.jpg" alt="Mara Voss at the bench"><div class="tint"></div></div>
+          <p class="figcap">FIG.01 — THE OPERATOR. MARA VOSS, CALIBRATING.</p>
+        </div>
+        <div class="kicker mono"><i></i>01 / THE OPERATOR</div>
+        <h2 class="op-quote">"IF THE BENCH DOESN'T <em>SURPRISE</em> ME, I HAVEN'T TESTED HARD ENOUGH."</h2>
+        <div class="op-body">
+          <p>I'm Mara Voss. Nine years in hardware QA, five of them on camera, all of them allergic to press kits. Every number on this site comes out of my own rig: an anechoic-ish closet, a calibrated colorimeter, a thermal camera older than some of my viewers, and a 1,000 fps chase cam for latency work.</p>
+          <p>Sponsored scores don't exist here. Companies send hardware; I send back measurements and opinions they can't preview. That's the deal. That's been the deal since episode one.</p>
+        </div>
+        <div class="stats">
+          <div class="stat"><b data-count="247">0</b><span>EPISODES SHIPPED</span></div>
+          <div class="stat"><b data-count="1842">0</b><span>HOURS UNDER LOAD</span></div>
+          <div class="stat"><b data-count="31">0</b><span>SPONSORSHIPS DECLINED</span></div>
+          <div class="stat"><b data-count="0">0</b><span>PAID SCORES, EVER</span></div>
+        </div>
+        <div class="bts">
+          <figure>
+            <div class="ph"><img src="https://picsum.photos/seed/sn-bts1/900/506.jpg" alt="Behind the scenes — calibration day" loading="lazy"><div class="tint"></div></div>
+            <p class="figcap">FIG.02 — CALIBRATION DAY. THE COLORIMETER NEVER LIES.</p>
+          </figure>
+          <figure>
+            <div class="ph"><img src="https://picsum.photos/seed/sn-bts2/520/520.jpg" alt="Behind the scenes — the anechoic closet" loading="lazy"><div class="tint"></div></div>
+            <p class="figcap">FIG.03 — THE CLOSET. 18 dBA OF TRUTH.</p>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LIBRARY ================= -->
+  <section id="library" data-accent="blue">
+    <div class="wrap">
+      <header class="sec-head">
+        <div>
+          <div class="kicker mono"><i></i>02 / VIDEO LIBRARY</div>
+          <h2>EVERY DROP, CHRONOLOGICAL<b>.</b></h2>
+        </div>
+        <p class="sec-sub">Uncut, unbribed, newest first. Hover any thumbnail — it plays, silent and honest. Click through to the written companion.</p>
+      </header>
+      <div class="filters" id="filters"></div>
+      <div id="vgrid" style="margin-top:2.6rem"></div>
+    </div>
+  </section>
+
+  <!-- ================= REVIEWS ================= -->
+  <section id="reviews" data-accent="yellow">
+    <div class="wrap">
+      <header class="sec-head">
+        <div>
+          <div class="kicker mono"><i></i>03 / WRITTEN REVIEWS</div>
+          <h2>SLOWER. SHARPER<b>.</b></h2>
+        </div>
+        <p class="sec-sub">The videos say it fast — these say it exactly. The player sticks while you scroll. Click any timestamp and it follows you through the read.</p>
+      </header>
+      <div class="rev-tabs" id="revTabs"></div>
+      <div class="rev-layout">
+        <div class="rev-left">
+          <div class="player" id="revPlayer" data-cursor="PLAY">
+            <img id="revImg" src="" alt="">
+            <div class="tint"></div><div class="scan"></div>
+            <i class="cnr c1"></i><i class="cnr c2"></i><i class="cnr c3"></i><i class="cnr c4"></i>
+            <div class="osd">
+              <span class="osd-chip" id="syncChip">READ-ALONG · 00:00</span>
+              <span class="osd-chip o"><svg class="i" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z" fill="currentColor"/><path d="M16.5 9.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>MUTED</span>
+            </div>
+            <div class="osd-b">
+              <div class="osd-left">
+                <div class="eq"><span></span><span></span><span></span><span></span></div>
+                <span class="osd-chip tc o">00:00</span>
+              </div>
+              <span class="osd-chip" id="revDurChip">14:32</span>
+            </div>
+            <div class="playglyph"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></div>
+            <div class="pbar" id="revBar"></div>
+          </div>
+          <div class="transport">
+            <button class="tbtn" id="revPlay" aria-label="Play or pause"></button>
+            <input type="range" id="revSeek" min="0" max="1000" value="0" step="1" aria-label="Seek">
+            <span class="tclock" id="revTc">00:00 / 00:00</span>
+          </div>
+          <p class="rev-hint mono">SYNCED: CLICK ANY TIMESTAMP IN THE TEXT — THE PLAYER JUMPS AND KEEPS ROLLING.</p>
+        </div>
+        <div class="rev-right">
+          <div class="rmeta mono" id="revMeta"></div>
+          <h3 id="revTitle"></h3>
+          <p class="rev-dek" id="revDek"></p>
+          <div id="revBody"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BUY GUIDES ================= -->
+  <section id="guides" data-accent="red">
+    <div class="wrap">
+      <header class="sec-head">
+        <div>
+          <div class="kicker mono"><i></i>04 / BUY GUIDES</div>
+          <h2>OPINIONS WITH PRICE TAGS<b>.</b></h2>
+        </div>
+        <p class="sec-sub">"What I'd Buy at $X" — drag the budget and the list re-argues itself in real time. Scores are earned on the bench, never sold. Click a card for the longer verdict.</p>
+      </header>
+      <div class="guide-layout">
+        <div class="g-left">
+          <span class="g-lab mono">CURRENT BUDGET</span>
+          <div class="g-num" id="gNum">$1,000</div>
+          <input type="range" id="budget" min="50" max="1500" step="25" value="1000" data-cursor="DRAG" aria-label="Budget">
+          <div class="scale-row mono"><span>$50</span><span>$1,500</span></div>
+          <div class="pick-panel">
+            <div class="pick-k mono">THE PICK — BEST SCORE UNDER BUDGET</div>
+            <div class="pick-name" id="pickName">—</div>
+            <div class="pick-row mono"><span class="pick-score" id="pickScore">—</span><span id="pickPrice"></span><span id="pickCat"></span></div>
+            <p class="pick-why" id="pickWhy"></p>
+            <div class="pick-foot mono">
+              <div id="runnerLine"></div>
+              <div class="unlock" id="unlockLine"></div>
+            </div>
+          </div>
+        </div>
+        <div class="g-grid" id="ggrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SIGNALS ================= -->
+  <section id="signals" data-accent="blue">
+    <div class="wrap">
+      <header class="sec-head">
+        <div>
+          <div class="kicker mono"><i></i>05 / SIGNALS</div>
+          <h2>TWO WAYS IN<b>.</b></h2>
+        </div>
+        <p class="sec-sub">The free weekly, or the room where the cuts go. Both are mine, neither is for sale.</p>
+      </header>
+      <div class="sig-grid">
+        <div class="news">
+          <h3>THE TAKE THAT <b>DIDN'T SURVIVE</b> THE EDIT.</h3>
+          <p class="lead">One email, every Sunday. The bench data before the video does, the opinions too spiky for an outro, and exactly zero sponsor slots.</p>
+          <form id="nlForm" novalidate>
+            <span class="nl-lab mono">YOUR EMAIL — THE PITCHES TYPE THEMSELVES:</span>
+            <div class="nl-form">
+              <input type="email" id="email" autocomplete="email" aria-label="Email address">
+              <button type="submit">SUBSCRIBE<svg class="i" viewBox="0 0 24 24" width="11" height="11"><path d="M4 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none"/></svg></button>
+            </div>
+            <p class="nl-err" id="nlErr"></p>
+          </form>
+          <div class="nl-meta mono">
+            <span>84,112 READERS</span><span>0 SPONSOR SLOTS</span><span>UNSUB IN ONE CLICK</span>
+          </div>
+          <div class="nl-note">
+            <img src="https://picsum.photos/seed/sn-portrait/120/120.jpg" alt="Mara Voss">
+            <span>Every email is written by me between renders. No ghostwriter, no agency, no "synergy". — M.</span>
+          </div>
+        </div>
+        <div class="patreon">
+          <div class="pat-head">
+            <span class="mono">MEMBERSHIP</span>
+            <h3>THE CUTTING ROOM.</h3>
+            <p>The floor of the studio where the dead takes, raw sheets and unedited rants live.</p>
+          </div>
+          <button class="tier"><b>$3</b><div><strong>THE RAW BENCH</strong><span>Every spreadsheet and graph, 48 hours before the video.</span></div><svg viewBox="0 0 24 24"><path d="M4 12h14M13 5l7 7-7 7"/></svg></button>
+          <button class="tier"><b>$8</b><div><strong>CUTTING ROOM</strong><span>Outtakes, dead takes, and the rant I can't post.</span></div><svg viewBox="0 0 24 24"><path d="M4 12h14M13 5l7 7-7 7"/></svg></button>
+          <button class="tier"><b>$20</b><div><strong>NAME IN CREDITS</strong><span>Your name in the outro + monthly live Q&A raffle.</span></div><svg viewBox="0 0 24 24"><path d="M4 12h14M13 5l7 7-7 7"/></svg></button>
+          <div class="pat-foot"><button class="btn btn-solid" id="joinBtn" style="width:100%;justify-content:center">OPEN THE CUTTING ROOM<svg class="i" viewBox="0 0 24 24"><path d="M4 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
-<footer>© 2026 ZORQUINT AI Studio</footer>
+
+<footer>
+  <div class="wrap">
+    <div class="f-mark">SIGNAL<b>/</b>NOISE</div>
+    <div class="f-row mono">
+      <span>© 2025 MARA VOSS — ALL OPINIONS MY OWN. BENCH DATA PUBLISHED RAW.</span>
+      <span><a href="#" class="f-soon">RSS</a> &nbsp;/&nbsp; <a href="#" class="f-soon">PRESS KIT</a> &nbsp;/&nbsp; <a href="#" class="f-soon">BUSINESS</a> &nbsp;/&nbsp; <a href="#" class="f-soon">BENCH SHEETS</a></span>
+      <span>51.51°N · 0.13°W — STUDIO B</span>
+    </div>
+  </div>
+</footer>
+
+<div id="toasts"></div>
+
 <script>
-let generatedPrompt="";
-function makePrompt(){
- const p=document.getElementById("prompt").value.trim();
- const s=document.getElementById("style").value;
- const box=document.getElementById("preview");
- if(!p){box.textContent="कृपया आधी चित्राचं वर्णन लिहा.";return;}
- generatedPrompt=p+", "+s+" style, high detail, beautiful composition, professional lighting";
- box.textContent=generatedPrompt;
+/* ================= HELPERS ================= */
+const $=(s,c=document)=>c.querySelector(s), $$=(s,c=document)=>[...c.querySelectorAll(s)];
+const fmt=s=>{s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const money=n=>'$'+n.toLocaleString('en-US');
+const ICONS={
+  play:'<svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg>',
+  pause:'<svg viewBox="0 0 24 24"><path d="M5 4h5v16H5zM14 4h5v16h-5z"/></svg>',
+  mute:'<svg class="i" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z" fill="currentColor"/><path d="M16.5 9.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>',
+  down:'<svg class="i" viewBox="0 0 24 24"><path d="M12 4v13M6 12l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none"/></svg>'
+};
+
+/* ================= DATA ================= */
+const CATS=[['keyboards','KEYBOARDS'],['audio','AUDIO'],['displays','DISPLAYS'],['gpus','GPUS'],['builds','BUILDS'],['hottakes','HOT TAKES'],['cpus','CPUS']];
+const label=k=>(CATS.find(c=>c[0]===k)||['',''])[1];
+
+const VIDEOS=[
+ {id:'ep247',ep:247,title:'The $2,000 Keyboard Is a Lie (I Bought It Anyway)',cat:'keyboards',dur:872,date:'12 DEC',views:'1.2M',seed:'sn-ep247',review:'r1'},
+ {id:'ep246',ep:246,title:'This $89 DAC Embarrasses My $900 One',cat:'audio',dur:667,date:'05 DEC',views:'861K',seed:'sn-ep246',review:'r2'},
+ {id:'ep245',ep:245,title:'OLED vs Mini-LED: The Burn-In Test Nobody Runs Long Enough',cat:'displays',dur:1361,date:'28 NOV',views:'1.4M',seed:'sn-ep245'},
+ {id:'ep244',ep:244,title:'The GPU Upgrade Trap: Four Generations, One Spreadsheet',cat:'gpus',dur:1018,date:'21 NOV',views:'990K',seed:'sn-ep244'},
+ {id:'ep243',ep:243,title:'Silent PC, Loud Opinions: 18 dBA Under Full Load',cat:'builds',dur:1164,date:'14 NOV',views:'724K',seed:'sn-ep243'},
+ {id:'ep242',ep:242,title:'HDMI 2.1 Is a Marketing Number',cat:'hottakes',dur:493,date:'07 NOV',views:'2.1M',seed:'sn-ep242'},
+ {id:'ep241',ep:241,title:'Every Headset Mic Sounds Like a Walkie-Talkie. Fixed for $12.',cat:'audio',dur:765,date:'31 OCT',views:'641K',seed:'sn-ep241'},
+ {id:'ep240',ep:240,title:'1,000 Hours on One Keyboard: What Finally Broke',cat:'keyboards',dur:936,date:'24 OCT',views:'838K',seed:'sn-ep240'},
+ {id:'ep239',ep:239,title:'The Monitor Industry Hates Your Eyes',cat:'displays',dur:782,date:'17 OCT',views:'1.1M',seed:'sn-ep239',review:'r3'},
+ {id:'ep238',ep:238,title:'9800X3D, One Year Later: Still Cheating',cat:'cpus',dur:651,date:'10 OCT',views:'952K',seed:'sn-ep238'}
+];
+
+const REVIEWS=[
+ {id:'r1',no:'01',tab:'The $2,000 Keyboard, Measured',epOf:'COMPANION TO EP.247',read:'6 MIN READ · 1,190 WORDS',
+  title:'The $2,000 Keyboard, <b>Measured.</b>',dur:872,seed:'sn-ep247',
+  dek:'The video is fourteen minutes of receipts. This is the same receipts, slower — with the bench sheet, the force curves, and the two sentences the edit cut.',
+  blocks:[
+   {t:0,html:`Let's get the number out of the way first: <span class="num">$2,199</span> as reviewed, with the brass weight kit and the leather tray nobody asked for. That's a used car with keys. Over the next fourteen minutes I'm going to tell you it's also, measurably, the best keyboard I've ever put on the bench — <span class="hl">and that you still shouldn't buy it.</span> Both things are true. That's the whole episode.`},
+   {t:108,html:`The unboxing is theater and I refuse to pretend otherwise. Machined aluminum, 2.1 kilograms, foam-lined case, a torque spec for the screws. It's gorgeous. It's also the moment the marketing team owns you — which is why <span class="hl">every measurement you'll see today was taken before I let myself enjoy any of it.</span>`},
+   {t:252,html:`Now the claim that made me buy this thing: <span class="num">0.125 ms</span> of "speed." I measured <span class="num">1.9 ms</span> wired, keypress-to-USB — excellent, genuinely top three — but 0.125 is debounce marketing, not latency. It's like measuring a car's 0–60 by when the engine <em>thinks</em> about turning over. Honorable numbers, wrong sport.`},
+   {t:420,html:`Sound: <span class="num">54 dBA</span> peak on a hard bottom-out, which is loud, and worse, it <span class="hl">rings</span> — the case resonates at 640 Hz like a tiny concert hall for plastic. The included foam kills most of it. A $4 sheet of Sorbothane kills all of it. A $2,199 keyboard should not need my mod drawer to pass a sound test.`},
+   {t:580,html:`Typing feel is where the money actually went. The 45 g springs are spring-matched within 2 grams across the board — I pulled all 104 of them and weighed them, because you people expect that from me now. Force curves this consistent are why writers keep buying these. <span class="hl">The keyboard is not the lie. The price is.</span>`},
+   {t:720,html:`So who is this for? Streamers who film keycaps. People whose rent is an abstraction. And, grudgingly, anyone who types eight hours a day and wants to feel every keystroke like a verdict. For everyone else, the <span class="num">$49</span> board in the buy guide below shares its switch feel and most of its manners.`},
+   {t:810,html:`Final score: <span class="num">9.1</span> — the best keyboard I've ever hated to love. Not because it's flawed. Because it isn't, and it still costs two grand. Watch the episode for the teardown, grab the bench sheet in the Cutting Room, and I'll see you Sunday with something cheaper and angrier.`}
+  ]},
+ {id:'r2',no:'02',tab:'The $89 DAC, Defended',epOf:'COMPANION TO EP.246',read:'5 MIN READ · 980 WORDS',
+  title:'The $89 DAC, <b>Defended.</b>',dur:667,seed:'sn-ep246',
+  dek:'Eleven minutes on camera; here, the full protocol — level matching, the blind-test logs, and why the winner of the headphone upgrade is never a DAC.',
+  blocks:[
+   {t:0,html:`<span class="num">Eighty-nine dollars.</span> SINAD of 121 dB. I've measured DACs at ten times the price that cannot say that sentence out loud, and this one doesn't even include a power brick — bus power, done. Today I'll show you the numbers, then try to hear the difference blind. One of those is going to embarrass someone, and I'll give you a hint: <span class="hl">it isn't the dongle.</span>`},
+   {t:95,html:`Quick decoder ring: SINAD measures how much junk a DAC adds to a clean signal. Anything over <span class="num">100 dB</span> is beyond what your ears — <em>your</em> ears, the good ones, the golden ones — can resolve at listening volume. At 121, this box is seventeen points past the edge of human relevance. You are arguing about paint on a car faster than sight.`},
+   {t:230,html:`The blind test: four listeners, twelve rounds, level-matched to <span class="num">0.1 dB</span>, my $900 reference unit versus this thing. Result: <span class="num">54%</span> correct. That's a coin flip with confidence issues. My producer went 6 for 12 and then accused me of rigging the rig, which, for the record, I didn't — the rig doesn't have opinions. I do.`},
+   {t:380,html:`Where your money <span class="hl">does</span> matter in audio, in order: the transducers on your head, the fit of those transducers, the room if you use speakers, and then everything else in a tie for a distant fourth. Spending $400 on a DAC and $60 on IEMs is buying a Ferrari engine for a shopping cart and wondering why the ride's still bad.`},
+   {t:520,html:`The wattage myth, briefly: desktop listening at normal levels pulls single-digit milliwatts. This "weak" little box drives <span class="num">300-ohm</span> headphones to volumes that will end friendships. The spec sheet knows this. The spec sheet also knows fear sells amps.`},
+   {t:620,html:`Verdict: <span class="num">9.4</span>, and it tops this year's buy guide until something dethrones it. Buy the $89 DAC. Buy better headphones with the <span class="num">$800</span> you saved. Send me a postcard from the land of hearing what actually changed.`}
+  ]},
+ {id:'r3',no:'03',tab:'Latency Is a Feeling',epOf:'COMPANION TO EP.239',read:'5 MIN READ · 1,040 WORDS',
+  title:'Latency Is <b>a Feeling.</b>',dur:782,seed:'sn-ep239',
+  dek:'Forty displays, a photodiode, and one uncomfortable conclusion about the sticker that says "1ms". The full table lives here, sorted by truth.',
+  blocks:[
+   {t:0,html:`Latency is a feeling until you build the rig. Ours: a <span class="num">1,000 fps</span> camera, a photodiode taped where your click lands, and forty displays that arrived in more boxes than I care to count. Click, flash, count frames. No marketing numbers were harmed — <span class="hl">because none of them survived contact with the photodiode.</span>`},
+   {t:110,html:`Method, thirty seconds: we trigger a visible click, the camera catches both the mouse going down and the screen changing, and the difference is the truth. Every panel gets five runs, averaged, at identical brightness and overdrive settings — because "1 ms" with overdrive cranked is a very different animal from "1 ms" the way you'd actually use it.`},
+   {t:260,html:`The OLEDs ran away with it — <span class="num">2.1 to 3.4 ms</span> click-to-photon, basically frame-perfect. What surprised me was the spread in "gaming" LCDs: <span class="num">8 to 31 ms</span>, a 15x difference between monitors wearing the same "1ms" sticker. That sticker, by the way, refers to response under conditions no human has ever reproduced. It's a horoscope for hardware.`},
+   {t:430,html:`Here's the uncomfortable one for the chat: past about <span class="num">10 ms</span>, my three esports test subjects couldn't reliably rank displays blind. Below that, they could. The difference between good and great is real. The difference between great and "tournament-grade plus" is a money allocation you're allowed to question.`},
+   {t:600,html:`Feelings matter — I'm not a robot, whatever the comments say. A responsive display makes the game feel <span class="hl">grippy</span>, like the world reads your inputs instead of filing them. But the feeling has a floor, and forty monitors just mapped it. Past the floor, what you're buying is bragging rights and a slightly lighter wallet.`},
+   {t:740,html:`Winner: the 480 Hz OLED at <span class="num">2.1 ms</span>, $1,099 — and the <span class="num">$649</span> runner-up is within 0.6 ms of it, which should tell you exactly what the extra $450 buys. Full table with all forty panels is on the Patreon sheet. See you Sunday.`}
+  ]}
+];
+
+const GUIDES=[
+ {id:'g1',name:'Aula F75',cat:'KEYBOARDS',price:49,score:8.9,why:'The budget board that made three "premium" reviews look silly. Hall-effect switches, a volume knob that doesn\u2019t rattle, $49.',more:'I ran it for 60 days as my daily. Zero complaints survived contact with the price tag. If someone tells you keyboards start at $150, show them this.'},
+ {id:'g2',name:'Fiio K11',cat:'AUDIO',price:139,score:8.7,why:'SINAD 120 for less than a night out. Bus-powered, honest, boring in the best possible way.',more:'Pairs with anything except a chip on your shoulder. The $800 you don\u2019t spend here buys the headphones that actually change your life.'},
+ {id:'g3',name:'Logitech G Pro X Superlight 2',cat:'PERIPHERALS',price:159,score:9.3,why:'Still the reference. 60 grams, no dramas, the shape your wrist already trusts.',more:'Boring is the feature. My unit has 1,100 hours and zero double-clicks, which in this industry is a miracle with a warranty.'},
+ {id:'g4',name:'Keychron Q1 Max',cat:'KEYBOARDS',price:199,score:9.1,why:'90% of the $2,000 experience for 9% of the money. The bench agrees with my hands.',more:'Wireless, QMK/VIA, gasket-mounted. It\u2019s the keyboard I recommend to people I actually like.'},
+ {id:'g5',name:'Moondrop Blessing 3',cat:'AUDIO',price:320,score:9.4,why:'Three years on top of the mid-fi IEM pile and nobody has knocked it off. Reference tuning, zero fluff.',more:'Not warm, not "fun" — just correct. If your playlist sounds bad on these, the playlist is the problem.'},
+ {id:'g6',name:'Ryzen 7 9800X3D',cat:'COMPUTE',price:479,score:9.6,why:'The gaming CPU that ends every "wait for the next one" argument. 3D V-Cache is cheating.',more:'One year later it\u2019s still the answer at 1440p and up. I said "still cheating" on camera and I meant it.'},
+ {id:'g7',name:'Sony WH-1000XM6',cat:'AUDIO',price:449,score:9.0,why:'The default noise-cancelling answer, now with a hinge that survives optimism.',more:'Not the best at any one thing except making an airplane disappear. That\u2019s enough for most people, and "most people" includes you on flight day.'},
+ {id:'g8',name:'LG C4 42"',cat:'DISPLAYS',price:899,score:9.5,why:'The OLED that ended my monitor arguments. 4K/120, 2.1 ms measured, desk-sized cinema.',more:'42 inches is a monitor if you\u2019re brave and your desk is honest. Best screen-per-dollar on the bench this year.'},
+ {id:'g9',name:'RTX 5070 Ti',cat:'COMPUTE',price:799,score:8.6,why:'Good card, cynical launch price. Buy it on sale or don\u2019t buy the story.',more:'It wins where it matters and loses where the pricing stings. Patience is a hardware strategy — wait for the inevitable dip.'},
+ {id:'g10',name:'Samsung Odyssey OLED G8',cat:'DISPLAYS',price:1299,score:8.9,why:'Gorgeous panel, tuner-flavored pricing. The LG does the same job and keeps $400.',more:'If you find it $300 under MSRP, upgrade this entry to a 9.2. Prices move faster than my opinion — watch the sticker, not the score.'}
+];
+
+const PITCH=['One email. Every Sunday. Four minutes.','The bench data before YouTube does.','The takes that didn\u2019t survive the edit.','No sponsor slots. Not even tiny ones.'];
+
+/* ================= TOASTS ================= */
+function toast(msg){
+  const w=$('#toasts'),t=document.createElement('div');
+  t.className='toast';t.textContent=msg;w.appendChild(t);
+  while(w.children.length>3)w.firstChild.remove();
+  requestAnimationFrame(()=>t.classList.add('on'));
+  setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),350)},3800);
 }
-async function copyPrompt(){
- if(!generatedPrompt){alert("आधी Prompt तयार करा.");return;}
- try{
-  await navigator.clipboard.writeText(generatedPrompt);
-  alert("Prompt कॉपी झाला!");
- }catch(e){
-  const t=document.createElement("textarea");
-  t.value=generatedPrompt;document.body.appendChild(t);t.select();
-  document.execCommand("copy");t.remove();alert("Prompt कॉपी झाला!");
- }
+
+/* ================= HOVER PREVIEW ENGINE ================= */
+function bindPreview(p,dur){
+  let iv=null,t=0;
+  const tc=$('.tc',p),bar=$('.pbar',p);
+  const draw=()=>{if(tc)tc.textContent=fmt(t)+' / '+fmt(dur);if(bar)bar.style.width=(t/dur*100)+'%'};
+  p.addEventListener('mouseenter',()=>{
+    if(iv)return;p.classList.add('playing');t=0;draw();
+    iv=setInterval(()=>{t+=.25;if(t>=dur)t=0;draw();},250);
+  });
+  p.addEventListener('mouseleave',()=>{clearInterval(iv);iv=null;p.classList.remove('playing');t=0;draw();});
 }
+
+/* ================= VIDEO LIBRARY ================= */
+function thumbHTML(v){
+  return `<div class="player thumb" data-cursor="PLAY" data-dur="${v.dur}">
+    <img src="https://picsum.photos/seed/${v.seed}/640/360.jpg" alt="${v.title}" loading="lazy">
+    <div class="tint"></div><div class="scan"></div>
+    <i class="cnr c1"></i><i class="cnr c2"></i><i class="cnr c3"></i><i class="cnr c4"></i>
+    <div class="osd">
+      <span class="osd-chip o"><i class="rec"></i>PREVIEW</span>
+      <span class="osd-chip o">${ICONS.mute}MUTED</span>
+    </div>
+    <div class="osd-b">
+      <div class="osd-left">
+        <div class="eq"><span></span><span></span><span></span><span></span></div>
+        <span class="osd-chip tc o">00:00 / ${fmt(v.dur)}</span>
+      </div>
+      <span class="osd-chip">${fmt(v.dur)}</span>
+    </div>
+    <div class="playglyph"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></div>
+    <div class="pbar"></div>
+  </div>`;
+}
+function renderVideos(){
+  $('#vgrid').innerHTML=VIDEOS.map((v,i)=>`
+    <article class="vcard ${i===0?'is-featured':''}" data-cat="${v.cat}" data-id="${v.id}" tabindex="0">
+      ${thumbHTML(v)}
+      <div class="vmeta">
+        <div class="row1 mono"><span class="ep">EP.${v.ep}</span><span>${label(v.cat)}</span><span>${v.date}</span></div>
+        <h3>${v.title}</h3>
+        <div class="row2 mono"><span>${v.views} VIEWS</span>${v.review?`<button class="companion" data-review="${v.review}">${ICONS.down} WRITTEN COMPANION</button>`:''}</div>
+      </div>
+    </article>`).join('');
+}
+
+/* filters — two-phase FLIP shuffle (300ms move) */
+let filterLock=false;
+function setFilter(cat){
+  if(filterLock)return;filterLock=true;
+  const cards=$$('#vgrid .vcard');
+  const willShow=c=>cat==='all'||c.dataset.cat===cat;
+  const staying=cards.filter(c=>!c.classList.contains('is-hidden')&&willShow(c));
+  const leaving=cards.filter(c=>!c.classList.contains('is-hidden')&&!willShow(c));
+  const entering=cards.filter(c=>c.classList.contains('is-hidden')&&willShow(c));
+  const first=new Map(staying.map(c=>[c,c.getBoundingClientRect()]));
+  leaving.forEach(c=>c.animate([{opacity:1},{opacity:0,transform:'scale(.97)'}],{duration:150,easing:'ease',fill:'forwards'}));
+  setTimeout(()=>{
+    cards.forEach(c=>c.classList.toggle('is-hidden',!willShow(c)));
+    void $('#vgrid').offsetHeight; // force reflow
+    staying.forEach(c=>{
+      const f=first.get(c),n=c.getBoundingClientRect();
+      const dx=f.left-n.left,dy=f.top-n.top;
+      if(dx||dy)c.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'none'}],{duration:300,easing:'cubic-bezier(.22,1,.36,1)'});
+    });
+    entering.forEach((c,i)=>{
+      c.getAnimations().forEach(a=>a.cancel());
+      c.animate([{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'none'}],{duration:280,delay:i*35,easing:'cubic-bezier(.22,1,.36,1)',fill:'backwards'});
+    });
+    setTimeout(()=>{filterLock=false},340);
+  },160);
+}
+function renderFilters(){
+  const box=$('#filters');
+  const items=[['all','ALL'],...CATS];
+  box.innerHTML=items.map(([k,l])=>{
+    const n=k==='all'?VIDEOS.length:VIDEOS.filter(v=>v.cat===k).length;
+    return `<button data-cat="${k}" class="${k==='all'?'on':''}" aria-pressed="${k==='all'}">${l}<sup>${n}</sup></button>`;
+  }).join('');
+  box.addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b||b.classList.contains('on'))return;
+    $$('button',box).forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)});
+    setFilter(b.dataset.cat);
+  });
+}
+ $('#vgrid').addEventListener('click',e=>{
+  const comp=e.target.closest('.companion');
+  if(comp){e.stopPropagation();openReview(comp.dataset.review,true);return;}
+  const card=e.target.closest('.vcard');if(!card)return;
+  const v=VIDEOS.find(x=>x.id===card.dataset.id);
+  if(v.review)openReview(v.review,true);
+  else toast(`EP.${v.ep} — WRITTEN COMPANION LANDS IN SUNDAY'S NEWSLETTER.`);
+});
+
+/* ================= REVIEWS: READ-ALONG PLAYER ================= */
+const rplayer=$('#revPlayer');
+const RP={t:0,dur:0,playing:false,last:0,raf:null,blocks:[],cur:-1};
+function loadReview(id){
+  const r=REVIEWS.find(x=>x.id===id);
+  $$('#revTabs button').forEach(b=>b.classList.toggle('on',b.dataset.review===id));
+  $('#revImg').src=`https://picsum.photos/seed/${r.seed}/960/540.jpg`;
+  $('#revImg').alt=r.tab;
+  RP.dur=r.dur;RP.t=0;RP.cur=-1;
+  $('#revDurChip').textContent=fmt(r.dur);
+  $('#revBody').innerHTML=r.blocks.map(b=>
+    `<p class="rblock" data-t="${b.t}"><button class="tstamp" data-t="${b.t}" aria-label="Jump to ${fmt(b.t)}">${fmt(b.t)}</button>${b.html}</p>`).join('');
+  RP.blocks=$$('#revBody .rblock');
+  $('#revTitle').innerHTML=r.title;
+  $('#revDek').textContent=r.dek;
+  $('#revMeta').innerHTML=`<span>${r.epOf}</span><span>${r.read}</span><span>VIDEO ${fmt(r.dur)}</span>`;
+  rpPause();rpDraw();
+}
+function rpDraw(){
+  $('#revTc').textContent=fmt(RP.t)+' / '+fmt(RP.dur);
+  $('#revSeek').value=Math.round(RP.t/RP.dur*1000);
+  $('#revBar').style.width=(RP.t/RP.dur*100)+'%';
+  $('.tc',rplayer).textContent=fmt(RP.t);
+  let idx=0;
+  RP.blocks.forEach((b,i)=>{if(RP.t>=+b.dataset.t)idx=i});
+  if(idx!==RP.cur){
+    RP.cur=idx;
+    RP.blocks.forEach((b,i)=>b.classList.toggle('active',i===idx));
+    $('#syncChip').textContent='READ-ALONG · '+fmt(+RP.blocks[idx].dataset.t);
+  }
+}
+function rpPlay(){
+  if(RP.playing)return;RP.playing=true;
+  rplayer.classList.add('playing');$('#revPlay').innerHTML=ICONS.pause;
+  RP.last=performance.now();RP.raf=requestAnimationFrame(step);
+}
+function rpPause(){
+  RP.playing=false;cancelAnimationFrame(RP.raf);
+  rplayer.classList.remove('playing');$('#revPlay').innerHTML=ICONS.play;
+}
+function step(ts){
+  if(!RP.playing)return;
+  const dt=(ts-RP.last)/1000;RP.last=ts;RP.t+=dt;
+  if(RP.t>=RP.dur){RP.t=RP.dur;rpDraw();rpPause();return;}
+  rpDraw();RP.raf=requestAnimationFrame(step);
+}
+function rpSeek(t){
+  RP.t=Math.min(RP.dur,Math.max(0,t));
+  if(RP.playing)RP.last=performance.now();
+  rpDraw();
+}
+function renderTabs(){
+  $('#revTabs').innerHTML=REVIEWS.map(r=>
+    `<button data-review="${r.id}"><i>${r.no}</i><span>${r.tab}<small>${r.epOf}</small></span></button>`).join('');
+}
+ $('#revTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)loadReview(b.dataset.review)});
+ $('#revPlay').addEventListener('click',()=>RP.playing?rpPause():rpPlay());
+ $('#revSeek').addEventListener('input',e=>rpSeek(e.target.value/1000*RP.dur));
+ $('#revBody').addEventListener('click',e=>{
+  const s=e.target.closest('.tstamp');if(!s)return;
+  rpSeek(+s.dataset.t);if(!RP.playing)rpPlay();
+  rplayer.classList.remove('flash');void rplayer.offsetWidth;rplayer.classList.add('flash');
+});
+rplayer.addEventListener('click',e=>{if(e.target.closest('button'))return;RP.playing?rpPause():rpPlay()});
+new IntersectionObserver(en=>{if(!en[0].isIntersecting&&RP.playing)rpPause()},{threshold:.15}).observe(rplayer);
+function openReview(id,scroll){
+  loadReview(id);
+  if(scroll){$('#reviews').scrollIntoView({behavior:'smooth'});toast('OPENING THE WRITTEN COMPANION — CLICK TIMESTAMPS TO JUMP.')}
+}
+
+/* ================= BUY GUIDES ================= */
+function renderGuides(){
+  $('#ggrid').innerHTML=GUIDES.map(g=>`
+    <article class="gcard" data-id="${g.id}" data-cursor="VERDICT" tabindex="0">
+      <span class="pick-stamp">THE PICK</span>
+      <div class="g-top"><h4>${g.name}</h4><span class="score">${g.score.toFixed(1)}</span></div>
+      <div class="g-mid mono"><span>${g.cat}</span><span>${money(g.price)}</span></div>
+      <p class="g-why">${g.why}</p>
+      <span class="over-chip mono">OVER BUDGET — PARKED</span>
+      <div class="g-more"><p>${g.more}</p></div>
+    </article>`).join('');
+}
+function flipReorder(els){
+  const grid=$('#ggrid');
+  const first=new Map(els.map(el=>[el,el.getBoundingClientRect()]));
+  els.forEach(el=>grid.appendChild(el));
+  els.forEach(el=>{
+    const f=first.get(el),n=el.getBoundingClientRect();
+    const dx=f.left-n.left,dy=f.top-n.top;
+    if(dx||dy)el.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'none'}],{duration:240,easing:'cubic-bezier(.22,1,.36,1)'});
+  });
+}
+let lastOrder='';
+const budget=$('#budget');
+function updateGuides(){
+  const b=+budget.value;
+  $('#gNum').textContent=money(b);
+  const pct=(b-50)/(1500-50)*100;
+  budget.style.background=`linear-gradient(90deg,var(--accent) ${pct}%,rgba(244,243,238,.22) ${pct}%)`;
+  const list=GUIDES.map(g=>({...g,over:g.price>b}))
+    .sort((a,c)=>a.over!==c.over?(a.over?1:-1):(a.over?a.price-c.price:(c.score-a.score||a.price-c.price)));
+  const order=list.map(g=>g.id).join();
+  if(order!==lastOrder){lastOrder=order;flipReorder(list.map(g=>$(`.gcard[data-id="${g.id}"]`)))}
+  const pick=list.find(g=>!g.over),runner=list.filter(g=>!g.over)[1],unlock=list.find(g=>g.over);
+  list.forEach(g=>{
+    const el=$(`.gcard[data-id="${g.id}"]`);
+    el.classList.toggle('over',g.over);
+    el.classList.toggle('ispick',g===pick);
+  });
+  $('#pickName').textContent=pick?pick.name:'NOTHING FITS';
+  $('#pickScore').textContent=pick?pick.score.toFixed(1):'—';
+  $('#pickPrice').textContent=pick?money(pick.price):'';
+  $('#pickCat').textContent=pick?pick.cat:'';
+  $('#pickWhy').textContent=pick?pick.why:'Drag the slider up. My picks are patient, not psychic.';
+  $('#runnerLine').textContent=runner?`RUNNER-UP: ${runner.name} — ${runner.score.toFixed(1)}`:'';
+  $('#unlockLine').textContent=unlock?`+${money(unlock.price-b)} UNLOCKS: ${unlock.name}`:(pick?'THE WHOLE BENCH IS UNDER BUDGET. FLEX ACCORDINGLY.':'');
+}
+budget.addEventListener('input',()=>requestAnimationFrame(updateGuides));
+ $('#ggrid').addEventListener('click',e=>{const c=e.target.closest('.gcard');if(c)c.classList.toggle('open')});
+ $('#ggrid').addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('gcard')){e.preventDefault();e.target.classList.toggle('open')}
+});
+
+/* ================= NEWSLETTER TYPEWRITER ================= */
+const email=$('#email');
+let twI=0,twC=0,twDel=false,twTimer=null,twActive=true;
+function twStep(){
+  if(!twActive)return;
+  const p=PITCH[twI];
+  if(!twDel){
+    twC++;email.setAttribute('placeholder',p.slice(0,twC)+(twC<p.length?'▌':''));
+    if(twC>=p.length){twDel=true;twTimer=setTimeout(twStep,1700);return}
+    twTimer=setTimeout(twStep,34+Math.random()*46);
+  }else{
+    twC--;email.setAttribute('placeholder',p.slice(0,twC)+'▌');
+    if(twC<=0){twDel=false;twI=(twI+1)%PITCH.length;twTimer=setTimeout(twStep,420);return}
+    twTimer=setTimeout(twStep,18);
+  }
+}
+email.addEventListener('focus',()=>{twActive=false;clearTimeout(twTimer);email.setAttribute('placeholder','YOU@DOMAIN.COM')});
+email.addEventListener('blur',()=>{if(email.value)return;twActive=true;twDel=false;twC=0;twTimer=setTimeout(twStep,300)});
+ $('#nlForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const v=email.value.trim();
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){
+    $('#nlErr').textContent="That email wouldn't pass QA. Try again.";
+    const f=$('.nl-form');f.classList.add('shake');setTimeout(()=>f.classList.remove('shake'),450);
+    return;
+  }
+  $('#nlErr').textContent='';
+  e.target.innerHTML=`<p class="subbed">CHECK YOUR INBOX — FIRST DROP THIS SUNDAY.<span>84,113 READERS NOW. NO SPONSOR SLOTS. EVER.</span></p>`;
+  toast('SUBSCRIBED — WELCOME TO THE NOISE FLOOR.');
+});
+
+/* ================= SCROLL SYSTEM ================= */
+const ACC={red:['#ff2a1f','#060606'],blue:['#2b5bff','#f4f3ee'],yellow:['#e8ff17','#060606']};
+new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;
+    const[a,ink]=ACC[e.target.dataset.accent];
+    document.documentElement.style.setProperty('--accent',a);
+    document.documentElement.style.setProperty('--accent-ink',ink);
+    $$('#nav nav a').forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id));
+  });
+},{rootMargin:'-42% 0px -52% 0px'}).observe&&$$('[data-accent]').forEach(s=>{
+  new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      if(!e.isIntersecting)return;
+      const[a,ink]=ACC[e.target.dataset.accent];
+      document.documentElement.style.setProperty('--accent',a);
+      document.documentElement.style.setProperty('--accent-ink',ink);
+      $$('#nav nav a').forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id));
+    });
+  },{rootMargin:'-42% 0px -52% 0px'}).observe(s);
+});
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  $('#prog').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+},{passive:true});
+
+/* stats count-up */
+const cIO=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;cIO.unobserve(e.target);
+    const el=e.target,target=+el.dataset.count,t0=performance.now();
+    (function tick(n){
+      const p=Math.min(1,(n-t0)/1100),v=Math.round(target*(1-Math.pow(1-p,3)));
+      el.textContent=v.toLocaleString('en-US');
+      if(p<1)requestAnimationFrame(tick);
+    })(t0);
+  });
+},{threshold:.5});
+ $$('[data-count]').forEach(el=>cIO.observe(el));
+
+/* ================= CURSOR ================= */
+if(matchMedia('(pointer:fine)').matches){
+  const cur=$('#cur'),lbl=$('#curLbl');
+  let tx=innerWidth/2,ty=innerHeight/2,cx=tx,cy=ty;
+  addEventListener('mousemove',e=>{tx=e.clientX;ty=e.clientY;cur.style.opacity=1});
+  document.addEventListener('mouseleave',()=>cur.style.opacity=0);
+  addEventListener('mousedown',()=>cur.classList.add('down'));
+  addEventListener('mouseup',()=>cur.classList.remove('down'));
+  document.addEventListener('mouseover',e=>{
+    const b=e.target.closest('[data-cursor]');
+    if(b){cur.classList.add('big');cur.classList.remove('mid');lbl.textContent=b.dataset.cursor;return}
+    const m=e.target.closest('a,button,.tstamp,input[type=range]');
+    cur.classList.toggle('mid',!!m);cur.classList.remove('big');
+  });
+  (function loop(){
+    cx+=(tx-cx)*.22;cy+=(ty-cy)*.22;
+    cur.style.transform=`translate3d(${cx}px,${cy}px,0)`;
+    requestAnimationFrame(loop);
+  })();
+}
+
+/* ================= MISC WIRING ================= */
+ $('#watchBtn').addEventListener('click',()=>toast("EP.247 STREAMS ON THE CHANNEL — THIS HOME BASE IS THE DIRECTOR'S CUT."));
+ $('#heroPlayer').addEventListener('click',()=>toast("EP.247 STREAMS ON THE CHANNEL — THIS HOME BASE IS THE DIRECTOR'S CUT."));
+ $('#toReview').addEventListener('click',()=>openReview('r1',true));
+ $('#subBtn').addEventListener('click',()=>toast('SUBSCRIBE LIVES ON THE CHANNEL. THE NEWSLETTER BELOW IS ALL MINE.'));
+ $('#joinBtn').addEventListener('click',()=>toast('THE CUTTING ROOM OPENS ON PATREON — THIS DEMO STOPS AT THE DOOR.'));
+ $$('.tier').forEach(t=>t.addEventListener('click',()=>toast('THE CUTTING ROOM OPENS ON PATREON — THIS DEMO STOPS AT THE DOOR.')));
+ $$('.f-soon').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();toast('COMING WITH THE PUBLIC LAUNCH — ASK ME ON THE CHANNEL.')}));
+
+/* ================= INIT ================= */
+const tk=$('#tick');tk.innerHTML+=tk.innerHTML; // seamless marquee loop
+renderVideos();renderFilters();renderTabs();
+bindPreview($('#heroPlayer'),872);
+ $$('#vgrid .player').forEach(p=>bindPreview(p,+p.dataset.dur));
+loadReview('r1');
+renderGuides();updateGuides();
+twStep();
 </script>
 </body>
 </html>
