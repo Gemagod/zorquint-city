@@ -2,798 +2,585 @@
 <html lang="mr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ट्रॅकनेट — फील्ड कंट्रोल कन्सोल</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ट्रॅकनेट — लाईव्ह लोकेशन</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Mukta:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#050806; --panel:#0a120d; --panel2:#08100a;
-  --line:rgba(53,240,140,.16); --line2:rgba(53,240,140,.08);
-  --grn:#35f08c; --amb:#ffb454; --red:#ff5449; --mut:#7d8f84;
-  --txt:#e8f5ec; --fm:'Rajdhani',sans-serif; --fb:'Mukta',sans-serif;
+  --bg:#050806;--panel:#0a120d;--panel2:#08100a;
+  --line:rgba(53,240,140,.18);--line2:rgba(53,240,140,.08);
+  --grn:#35f08c;--amb:#ffb454;--red:#ff5449;--mut:#7d8f84;--txt:#e8f5ec;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--txt);font-family:var(--fb);font-size:15px;line-height:1.5;overflow-x:hidden}
-::-webkit-scrollbar{width:8px;height:8px}
-::-webkit-scrollbar-track{background:#060a07}
-::-webkit-scrollbar-thumb{background:#1c3327;border-radius:0}
+body{background:var(--bg);color:var(--txt);font-family:'Mukta',sans-serif;font-size:15px;line-height:1.55}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 input{font:inherit;color:inherit}
-.mono{font-family:var(--fm);font-weight:600;letter-spacing:.06em}
-:focus-visible{outline:2px solid var(--grn);outline-offset:2px}
+a{color:var(--grn)}
+.mono{font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:.06em}
+[hidden]{display:none!important}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:#060a07}::-webkit-scrollbar-thumb{background:#1c3327}
+
+/* ---------- बटणे ---------- */
+.b{font-family:'Rajdhani';font-weight:700;font-size:12px;letter-spacing:.1em;padding:11px 16px;
+  border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.2s}
+.b:hover{border-color:var(--grn);color:var(--grn)}
+.b.pri{background:var(--grn);color:#06130b;border-color:var(--grn)}
+.b.pri:hover{filter:brightness(1.1);color:#06130b}
+.b.dan{border-color:rgba(255,84,73,.4);color:var(--red)}
+.b.dan:hover{border-color:var(--red)}
+.b svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+.b:disabled{opacity:.4;cursor:not-allowed}
+.ibtn{width:32px;height:32px;border:1px solid var(--line2);display:inline-grid;place-items:center;transition:.2s;flex:none}
+.ibtn:hover{border-color:var(--grn);color:var(--grn)}
+.ibtn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
 
 /* ---------- टॉपबार ---------- */
-.topbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:1.4rem;height:56px;padding:0 18px;
-  background:rgba(6,10,8,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:10px;font-family:var(--fm);font-weight:700;font-size:18px;letter-spacing:.08em}
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:14px;height:56px;padding:0 16px;
+  background:rgba(6,10,8,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:9px;font-family:'Rajdhani';font-weight:700;font-size:18px;letter-spacing:.08em}
 .brand svg{width:20px;height:20px;stroke:var(--grn);fill:none;stroke-width:1.6}
 .brand b{color:var(--grn)}
-.brand small{font-family:var(--fm);font-weight:500;font-size:10px;color:var(--mut);letter-spacing:.14em;border-left:1px solid var(--line);padding-left:10px}
-.tb-mid{margin-left:auto;font-size:11px;color:var(--mut);display:flex;align-items:center;gap:8px}
-.tb-mid .ok{width:7px;height:7px;background:var(--grn);border-radius:50%;animation:blink 1.6s steps(2) infinite}
-@keyframes blink{50%{opacity:.25}}
-.tb-mid b{color:var(--grn);font-weight:600}
-.clock{text-align:right;line-height:1.1}
-.clock b{font-family:var(--fm);font-size:16px;font-weight:700;letter-spacing:.1em}
-.clock span{display:block;font-family:var(--fm);font-size:10px;color:var(--mut);letter-spacing:.12em}
-.bell{position:relative;width:38px;height:38px;border:1px solid var(--line);display:grid;place-items:center;transition:.2s}
-.bell:hover{border-color:var(--grn)}
-.bell svg{width:16px;height:16px;stroke:var(--txt);fill:none;stroke-width:1.8}
-.badge{position:absolute;top:-7px;right:-7px;min-width:17px;height:17px;background:var(--red);color:#fff;
-  font-family:var(--fm);font-size:10px;font-weight:700;display:grid;place-items:center;padding:0 4px}
-.admin{font-family:var(--fm);font-size:11px;letter-spacing:.1em;color:var(--mut);border:1px solid var(--line);padding:9px 12px}
-.admin b{color:var(--grn)}
-.alerts{position:absolute;top:60px;right:18px;width:320px;background:var(--panel);border:1px solid var(--line);z-index:200}
-.alerts h4{font-family:var(--fm);font-size:11px;letter-spacing:.14em;color:var(--mut);padding:12px 14px;border-bottom:1px solid var(--line2);display:flex;justify-content:space-between;align-items:center}
-.alerts h4 button{color:var(--grn);font-size:10px;letter-spacing:.1em}
-.alerts ul{list-style:none;max-height:240px;overflow:auto}
-.alerts li{padding:10px 14px;border-bottom:1px solid var(--line2);font-size:13px;display:flex;gap:10px;align-items:baseline}
-.alerts li time{font-family:var(--fm);font-size:10px;color:var(--mut);flex:none}
-.alerts .none{color:var(--mut);font-size:13px;padding:16px 14px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.tb-right .em{font-size:12px;color:var(--mut);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* ---------- स्टॅट स्ट्रिप ---------- */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);max-width:1720px;margin:14px auto 0;padding:0 14px;gap:14px}
-.stat{background:var(--panel);border:1px solid var(--line);padding:14px 18px;display:flex;flex-direction:column;gap:2px;position:relative}
-.stat::before{content:"";position:absolute;left:0;top:0;width:3px;height:100%;background:var(--grn)}
-.stat b{font-family:var(--fm);font-weight:700;font-size:26px;letter-spacing:.04em}
+/* ---------- स्टॅट्स ---------- */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:1500px;margin:14px auto 0;padding:0 14px}
+.stat{background:var(--panel);border:1px solid var(--line);padding:12px 16px;border-left:3px solid var(--grn)}
+.stat b{font-family:'Rajdhani';font-weight:700;font-size:26px;display:block}
 .stat span{font-size:12px;color:var(--mut)}
-.stat:nth-child(4)::before{background:var(--amb)}
 
 /* ---------- लेआउट ---------- */
-.layout{display:grid;grid-template-columns:290px minmax(0,1fr) 330px;gap:14px;max-width:1720px;margin:14px auto;padding:0 14px}
-.panel{background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
-.phead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line2);
-  font-family:var(--fm);font-weight:700;font-size:12px;letter-spacing:.12em}
-.phead small{color:var(--mut);font-weight:500}
-.livechip{color:var(--grn);font-size:10px;letter-spacing:.14em;display:inline-flex;align-items:center;gap:6px}
-.livechip i{width:7px;height:7px;background:var(--grn);border-radius:50%;animation:blink 1.4s steps(2) infinite}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;max-width:1500px;margin:12px auto;padding:0 14px}
+.panel{background:var(--panel);border:1px solid var(--line)}
+.phead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line2);
+  font-family:'Rajdhani';font-weight:700;font-size:12px;letter-spacing:.12em}
+.phead small{color:var(--mut);font-weight:500;letter-spacing:.04em;font-family:'Mukta'}
+.mapwrap{position:relative;height:clamp(380px,58vh,620px);background:#060f0a}
+#adminMap{position:absolute;inset:0}
+.mapchip{position:absolute;left:10px;bottom:10px;z-index:5;font-family:'Rajdhani';font-weight:600;font-size:10px;
+  letter-spacing:.12em;background:rgba(4,8,6,.85);border:1px solid var(--line);padding:5px 9px;color:var(--grn);pointer-events:none}
+.maphdr{display:flex;gap:8px;align-items:center}
+.maphdr .b{padding:6px 10px;font-size:10px}
 
-/* ---------- यूजर यादी ---------- */
-.roster .tools{padding:10px 12px;border-bottom:1px solid var(--line2);display:grid;gap:10px}
-.roster input[type=text]{background:var(--panel2);border:1px solid var(--line2);padding:9px 12px;font-size:13px;outline:none;width:100%}
-.roster input[type=text]:focus{border-color:var(--grn)}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chips button{font-family:var(--fm);font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--mut);
-  border:1px solid var(--line2);padding:5px 9px;transition:.2s}
-.chips button.on{color:#06130b;background:var(--grn);border-color:var(--grn)}
-#ulist{overflow:auto;flex:1;max-height:calc(100vh - 320px);min-height:280px}
-.ritem{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border-bottom:1px solid var(--line2);
-  border-left:2px solid transparent;transition:.15s}
-.ritem:hover{background:rgba(53,240,140,.05)}
-.ritem.sel{border-left-color:var(--grn);background:rgba(53,240,140,.07)}
-.ava{width:34px;height:34px;flex:none;border:1px solid var(--line);display:grid;place-items:center;
-  font-family:var(--fm);font-weight:700;font-size:14px;color:var(--grn)}
-.ritem.off .ava{color:#4a5a50}
-.rmain{flex:1;min-width:0}
-.rmain b{display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rmain small{font-size:11px;color:var(--mut)}
-.rend{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
-.rend small{font-family:var(--fm);font-size:10px;color:var(--mut)}
-.sdot{width:8px;height:8px;border-radius:50%}
-.sdot.active{background:var(--grn);box-shadow:0 0 8px rgba(53,240,140,.6)}
-.sdot.idle{background:var(--amb)}
-.sdot.offline{background:#37423b}
+/* ---------- यादी ---------- */
+#peopleList{max-height:420px;overflow:auto}
+.prow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line2)}
+.prow .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.dot.live{background:var(--grn);box-shadow:0 0 8px rgba(53,240,140,.7)}
+.dot.stale{background:var(--amb)}
+.dot.stop{background:#37423b}
+.pmain{flex:1;min-width:0}
+.pmain b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pmain small{font-size:11px;color:var(--mut)}
+.pacts{display:flex;gap:5px}
 
-/* ---------- नकाशा ---------- */
-.centercol{display:flex;flex-direction:column;gap:14px;min-width:0}
-.maphead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line2);flex-wrap:wrap}
-.maphead b{font-family:var(--fm);font-size:12px;letter-spacing:.12em}
-.legend{display:flex;gap:14px;font-size:11px;color:var(--mut);flex-wrap:wrap}
-.legend i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:0}
-.mapvp{position:relative;height:clamp(380px,54vh,600px);overflow:hidden;background:#060f0a;cursor:crosshair;user-select:none}
-.mapvp svg.city{position:absolute;inset:0;width:100%;height:100%}
-.scanfx{position:absolute;inset:0;pointer-events:none;
-  background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 4px);mix-blend-mode:overlay}
-.radar{position:absolute;left:50%;top:50%;width:150%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
-  pointer-events:none;mix-blend-mode:screen;
-  background:conic-gradient(from 0deg,rgba(53,240,140,.18),transparent 75deg);
-  animation:spin 7s linear infinite}
-.radar::before,.radar::after{content:"";position:absolute;inset:0;border-radius:50%;border:1px solid rgba(53,240,140,.10)}
-.radar::before{inset:28%}
-@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
-.chx,.chy{position:absolute;background:rgba(53,240,140,.25);pointer-events:none;display:none}
-.chx{top:0;bottom:0;width:1px}.chy{left:0;right:0;height:1px}
-.coordchip{position:absolute;right:10px;bottom:10px;font-family:var(--fm);font-size:10px;letter-spacing:.1em;
-  color:var(--grn);background:rgba(4,8,6,.8);border:1px solid var(--line);padding:5px 9px;pointer-events:none;display:none}
-.lastev{position:absolute;left:10px;bottom:10px;right:auto;max-width:70%;font-size:12px;color:var(--txt);
-  background:rgba(4,8,6,.82);border:1px solid var(--line);border-left:3px solid var(--grn);padding:7px 11px;pointer-events:none}
-.lastev.al{border-left-color:var(--red)}
-.lastev b{font-family:var(--fm);font-size:10px;color:var(--mut);margin-right:8px;letter-spacing:.1em}
-.lastev.slide{animation:evin .35s ease}
-@keyframes evin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* ---------- लिंक बॉक्स (खाली) ---------- */
+.linkbox{max-width:1500px;margin:12px auto 30px;padding:0 14px}
+.cbody{padding:14px}
+.crow{display:flex;gap:10px;flex-wrap:wrap}
+.crow input{flex:1;min-width:200px;background:var(--panel2);border:1px solid var(--line2);padding:12px 14px;outline:none}
+.crow input:focus{border-color:var(--grn)}
+#linkResult{margin-top:12px;border:1px dashed var(--line);padding:12px;background:var(--panel2)}
+#linkResult .lbl{font-family:'Rajdhani';font-weight:600;font-size:10px;letter-spacing:.14em;color:var(--grn);margin-bottom:6px}
+.urlbox{background:#040805;border:1px solid var(--line2);padding:10px 12px;font-family:'Rajdhani';font-weight:600;
+  font-size:13px;letter-spacing:.03em;color:#bfe9d2;word-break:break-all;user-select:all;margin-bottom:10px}
+.rbtns{display:flex;gap:8px;flex-wrap:wrap}
+.wa{border-color:rgba(53,240,140,.4)}
+#linksTable{padding:0 14px 14px;overflow:auto}
+.lrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);font-size:13px}
+.lrow .nm{font-weight:700;min-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow .lk{flex:1;color:var(--mut);font-family:'Rajdhani';font-weight:600;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{color:var(--mut);font-size:13px;padding:10px 0}
 
-/* पिन */
-.pin{position:absolute;transform:translate(-50%,-50%);width:0;height:0;cursor:pointer}
-.pin .core{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border-radius:50%;background:var(--grn);
-  box-shadow:0 0 10px rgba(53,240,140,.8);transition:.2s}
-.pin .ring{position:absolute;left:-6px;top:-6px;width:12px;height:12px;border:1px solid var(--grn);border-radius:50%;opacity:0}
-.pin.active .ring{animation:pulse 2.2s ease-out infinite}
-@keyframes pulse{0%{transform:scale(.6);opacity:.9}100%{transform:scale(3.2);opacity:0}}
-.pin.idle .core{background:var(--amb);box-shadow:0 0 8px rgba(255,180,84,.7)}
-.pin.idle .ring{border-color:var(--amb);animation-name:pulsei;animation-duration:3.4s}
-@keyframes pulsei{0%{transform:scale(.6);opacity:.7}100%{transform:scale(2.4);opacity:0}}
-.pin.offline .core{background:#3a463f;box-shadow:none}
-.pin.alert .core{background:var(--red)}
-.pin.alert .ring{border-color:var(--red);opacity:1;animation:blink .5s steps(2) 8}
-.pin.sel .core{width:14px;height:14px;left:-7px;top:-7px;outline:2px solid rgba(255,255,255,.85);outline-offset:2px}
-.pin .ptag{position:absolute;left:12px;top:-11px;white-space:nowrap;font-size:11px;font-weight:600;color:#06130b;
-  background:var(--grn);padding:2px 7px;opacity:0;transform:translateX(-4px);transition:.2s;pointer-events:none}
-.pin.offline .ptag{color:var(--txt);background:#25302a}
-.pin:hover .ptag,.pin.sel .ptag{opacity:1;transform:none}
-.pin.you .core{background:#fff;outline:2px solid var(--grn);outline-offset:2px}
-.pin.you .ptag{background:#fff;color:#06130b}
-.trailpoly{fill:none;stroke:rgba(53,240,140,.5);stroke-width:2;stroke-dasharray:4 5}
-svg text{font-family:var(--fb);font-size:13px;fill:rgba(232,245,236,.28);font-weight:600}
-svg .zlabel{fill:rgba(255,84,73,.55);font-size:11px;letter-spacing:.05em}
+/* ---------- लॉगिन / ट्रॅक कार्ड ---------- */
+.center{min-height:calc(100vh - 56px);display:grid;place-items:center;padding:18px}
+.card{width:min(440px,100%);background:var(--panel);border:1px solid var(--line);padding:26px;position:relative}
+.card::before,.card::after{content:"";position:absolute;width:14px;height:14px;pointer-events:none}
+.card::before{top:-1px;left:-1px;border-top:2px solid var(--grn);border-left:2px solid var(--grn)}
+.card::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--grn);border-right:2px solid var(--grn)}
+.card h2{font-family:'Rajdhani';font-weight:700;font-size:22px;margin-bottom:4px}
+.card .sub{color:var(--mut);font-size:13px;margin-bottom:16px}
+.card label{display:block;font-family:'Rajdhani';font-weight:600;font-size:10px;letter-spacing:.14em;color:var(--mut);margin:12px 0 4px}
+.card input{width:100%;background:var(--panel2);border:1px solid var(--line2);padding:12px 14px;outline:none}
+.card input:focus{border-color:var(--grn)}
+.ferr{color:var(--red);font-size:12.5px;min-height:18px;margin-top:8px}
+.fbtns{display:flex;gap:10px;margin-top:14px}
+.fbtns .b{flex:1}
+.tog{margin-top:12px;font-size:13px;color:var(--mut);text-align:center}
+.tog button{color:var(--grn)}
+.pin-ico{width:52px;height:52px;margin:0 auto 12px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%}
+.pin-ico svg{width:24px;height:24px;stroke:var(--grn);fill:none;stroke-width:1.8}
+.pul{width:10px;height:10px;background:var(--grn);border-radius:50%;display:inline-block;animation:blink 1.4s steps(2) infinite;margin-right:8px}
+@keyframes blink{50%{opacity:.25}}
+.kvrow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line2);font-size:13px}
+.kvrow span{color:var(--mut)}
+.kvrow b{font-family:'Rajdhani';font-weight:600}
+#trackMap{height:230px;margin-top:14px;border:1px solid var(--line);background:#060f0a;position:relative}
+.consent ul{list-style:none;margin:10px 0 16px}
+.consent li{display:flex;gap:9px;font-size:13.5px;padding:5px 0;color:#c3d4c8}
+.consent li svg{width:16px;height:16px;stroke:var(--grn);fill:none;stroke-width:2;flex:none;margin-top:3px}
 
-/* ---------- फीड ---------- */
-.feedpanel{flex:1}
-#feed{list-style:none;overflow:auto;max-height:240px;min-height:160px}
-#feed li{display:flex;align-items:baseline;gap:10px;padding:8px 14px;border-bottom:1px solid var(--line2);font-size:13px;animation:evin .3s ease}
-#feed time{font-family:var(--fm);font-size:10px;color:var(--mut);flex:none;letter-spacing:.06em}
-#feed .fdot{width:7px;height:7px;flex:none;border-radius:50%;background:var(--grn);position:relative;top:-1px}
-#feed li.al .fdot{background:var(--red)}
-#feed li.amb .fdot{background:var(--amb)}
-#feed li span{flex:1}
-.fthumb{width:38px;height:38px;object-fit:cover;border:1px solid var(--line);flex:none}
+/* ---------- सेटअप स्क्रीन ---------- */
+.setup{max-width:760px;margin:0 auto;padding:30px 16px 60px}
+.setup h1{font-family:'Rajdhani';font-weight:700;font-size:28px;margin-bottom:6px}
+.setup .lead{color:var(--mut);margin-bottom:22px}
+.step{background:var(--panel);border:1px solid var(--line);padding:18px;margin-bottom:14px}
+.step h3{font-family:'Rajdhani';font-weight:700;font-size:15px;letter-spacing:.06em;color:var(--grn);margin-bottom:8px}
+.step ol{padding-left:20px;font-size:13.5px}
+.step ol li{margin:6px 0}
+.step code{background:#040805;border:1px solid var(--line2);padding:2px 6px;font-size:12px;color:#bfe9d2;word-break:break-all}
+.step pre{background:#040805;border:1px solid var(--line2);padding:12px;font-size:11.5px;overflow:auto;color:#bfe9d2;margin:8px 0}
+.warnbox{border:1px dashed var(--amb);color:var(--amb);padding:12px 14px;font-size:13px;margin-bottom:18px}
 
-/* ---------- डीटेल पॅनेल ---------- */
-.rightcol{display:flex;flex-direction:column;gap:14px;min-width:0}
-.detail .dhead{display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid var(--line2)}
-.detail .dhead .ava{width:44px;height:44px;font-size:18px}
-.dhead h3{font-family:var(--fm);font-size:18px;font-weight:700;letter-spacing:.03em;line-height:1.15}
-.dhead .mono{display:block;font-size:10px;color:var(--mut);letter-spacing:.1em;font-weight:500}
-.stchip{margin-left:auto;font-family:var(--fm);font-size:10px;letter-spacing:.12em;padding:4px 9px;border:1px solid}
-.stchip.active{color:var(--grn);border-color:var(--grn)}
-.stchip.idle{color:var(--amb);border-color:var(--amb)}
-.stchip.offline{color:var(--mut);border-color:var(--mut)}
-.dbody{padding:6px 14px 12px;overflow:auto}
-.kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed var(--line2);font-size:13px}
-.kv span{color:var(--mut)}
-.kv b{font-family:var(--fm);font-weight:600;font-size:13px;letter-spacing:.02em;text-align:right}
-.batbar{width:70px;height:7px;background:#152018;border:1px solid var(--line2);display:inline-block;vertical-align:middle;margin-left:8px;position:relative;top:-1px}
-.batbar i{display:block;height:100%;background:var(--grn)}
-.batbar.warn i{background:var(--amb)}
-.batbar.low i{background:var(--red)}
-.locbox{margin:10px 0;padding:11px 12px;border:1px solid var(--line);background:var(--panel2)}
-.locbox small{font-family:var(--fm);font-size:10px;letter-spacing:.14em;color:var(--mut)}
-.locbox .coords{font-family:var(--fm);font-weight:700;font-size:17px;letter-spacing:.05em;color:var(--grn);margin-top:2px}
-.locbox .coords.flash{animation:cf .5s ease}
-@keyframes cf{0%{background:rgba(53,240,140,.25)}100%{background:transparent}}
-.locbox p{font-size:12px;color:var(--mut);margin-top:2px}
-.tlhead{font-family:var(--fm);font-size:10px;letter-spacing:.14em;color:var(--mut);margin:12px 0 4px}
-.tline{list-style:none}
-.tline li{display:flex;gap:10px;padding:6px 0 6px 14px;border-left:1px solid var(--line2);font-size:12.5px;position:relative}
-.tline li::before{content:"";position:absolute;left:-3.5px;top:12px;width:6px;height:6px;border-radius:50%;background:var(--grn)}
-.tline time{font-family:var(--fm);font-size:10px;color:var(--mut);flex:none;padding-top:2px}
-.dacts{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line2);flex-wrap:wrap}
-.abtn{flex:1;font-family:var(--fm);font-size:10px;font-weight:700;letter-spacing:.1em;border:1px solid var(--line);
-  padding:10px 8px;text-align:center;transition:.2s;white-space:nowrap}
-.abtn:hover{border-color:var(--grn);color:var(--grn)}
-.abtn.pri{background:var(--grn);color:#06130b;border-color:var(--grn)}
-.abtn.pri:hover{filter:brightness(1.1);color:#06130b}
-
-/* ---------- ॲनालिटिक्स ---------- */
-.bars{display:flex;align-items:flex-end;gap:3px;height:76px;padding:12px 14px 4px}
-.bars span{flex:1;background:#1b2c21;min-height:3px;position:relative}
-.bars span.cur{background:var(--grn);box-shadow:0 0 8px rgba(53,240,140,.4)}
-.axlab{display:flex;justify-content:space-between;padding:0 14px 10px;font-family:var(--fm);font-size:9px;color:var(--mut);letter-spacing:.1em}
-.arow{display:grid;grid-template-columns:92px 1fr 34px;gap:10px;align-items:center;padding:5px 14px;font-size:12px}
-.arow .tk{height:8px;background:#14231a}
-.arow .tk i{display:block;height:100%;background:var(--grn);opacity:.85}
-.arow b{font-family:var(--fm);font-size:11px;text-align:right;color:var(--mut)}
-.asub{font-family:var(--fm);font-size:10px;letter-spacing:.14em;color:var(--mut);padding:12px 14px 4px;border-top:1px dashed var(--line2);margin-top:6px}
-
-/* ---------- डेमो पॅनेल ---------- */
-.demo .dbody p{font-size:13px;color:#a9bcad;padding:12px 14px 0}
-.demo .dbody small{display:block;padding:8px 14px 12px;font-size:11px;color:var(--mut)}
-
-/* ---------- मॉडल ---------- */
-.mback{position:fixed;inset:0;z-index:500;background:rgba(3,6,4,.8);backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px}
-.mback[hidden]{display:none}
-.modal{width:min(480px,100%);background:var(--panel);border:1px solid var(--line);position:relative}
-.modal::before,.modal::after{content:"";position:absolute;width:14px;height:14px;pointer-events:none}
-.modal::before{top:-1px;left:-1px;border-top:2px solid var(--grn);border-left:2px solid var(--grn)}
-.modal::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--grn);border-right:2px solid var(--grn)}
-.mhead{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line2)}
-.mhead b{font-family:var(--fm);font-size:12px;letter-spacing:.14em;color:var(--grn)}
-.mhead button{color:var(--mut);font-size:18px;line-height:1}
-.modal .mbody{padding:16px}
-.mstep p{font-size:13.5px;color:#c3d4c8;margin-bottom:10px}
-.mstep ul{list-style:none;margin:0 0 12px}
-.mstep li{display:flex;gap:9px;font-size:13px;padding:4px 0;color:#a9bcad}
-.mstep li svg{width:15px;height:15px;stroke:var(--grn);fill:none;stroke-width:2;flex:none;margin-top:3px}
-.mpriv{font-size:11px;color:var(--mut);border:1px dashed var(--line);padding:9px 11px;margin-bottom:14px}
-.mrow{display:flex;gap:10px;flex-wrap:wrap}
-.mbtn{flex:1;font-family:var(--fm);font-size:11px;font-weight:700;letter-spacing:.1em;padding:12px;text-align:center;border:1px solid var(--line);transition:.2s}
-.mbtn.pri{background:var(--grn);color:#06130b;border-color:var(--grn)}
-.mbtn.pri:disabled{opacity:.35;cursor:not-allowed}
-.mbtn:not(.pri):hover{border-color:var(--grn);color:var(--grn)}
-#camWrap{position:relative;aspect-ratio:4/3;background:#040705;border:1px solid var(--line);margin-bottom:12px;overflow:hidden}
-#camVid,#camShot{width:100%;height:100%;object-fit:cover;display:none}
-#camWrap.on #camVid,#camWrap.shot #camShot{display:block}
-#camWrap.off::after{content:"कॅमेरा उपलब्ध नाही";position:absolute;inset:0;display:grid;place-items:center;
-  color:var(--mut);font-size:13px}
-.camhud{position:absolute;top:8px;left:10px;right:10px;display:flex;justify-content:space-between;pointer-events:none;
-  font-family:var(--fm);font-size:10px;letter-spacing:.12em;color:#fff}
-.camhud span{background:rgba(0,0,0,.65);padding:4px 8px;display:inline-flex;align-items:center;gap:6px}
-.camhud .recd{width:7px;height:7px;background:var(--red);border-radius:50%;animation:blink 1s steps(2) infinite}
-#geoLine{font-family:var(--fm);font-size:12px;letter-spacing:.04em;border:1px dashed var(--line);padding:9px 11px;margin-bottom:12px;color:var(--grn)}
-#geoLine.warn{color:var(--amb)}
-
-/* ---------- फुटर / टोस्ट ---------- */
-.consent{max-width:1720px;margin:0 auto;padding:14px;font-size:12px;color:var(--mut);display:flex;gap:10px;align-items:baseline}
-.consent b{color:var(--amb);font-family:var(--fm);font-size:11px;letter-spacing:.1em;flex:none}
-#toasts{position:fixed;left:16px;bottom:16px;z-index:600;display:grid;gap:8px}
-.toast{background:#0c150f;border:1px solid var(--line);border-left:3px solid var(--grn);padding:11px 15px;
-  font-size:13px;max-width:330px;opacity:0;transform:translateY(10px);transition:.3s}
+/* ---------- टोस्ट ---------- */
+#toasts{position:fixed;left:16px;bottom:16px;z-index:400;display:grid;gap:8px}
+.toast{background:#0c150f;border:1px solid var(--line);border-left:3px solid var(--grn);padding:11px 15px;font-size:13px;
+  max-width:330px;opacity:0;transform:translateY(10px);transition:.3s}
 .toast.on{opacity:1;transform:none}
 
-@media(max-width:1240px){
-  .layout{grid-template-columns:260px minmax(0,1fr)}
-  .rightcol{grid-column:1/3;display:grid;grid-template-columns:1fr 1fr}
-  #ulist{max-height:340px}
-}
-@media(max-width:840px){
-  .layout{grid-template-columns:1fr}
-  .rightcol{grid-column:auto;grid-template-columns:1fr}
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .tb-mid,.admin{display:none}
-  .mapvp{height:400px}
-}
-@media (prefers-reduced-motion:reduce){
-  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-}
+@media(max-width:980px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.stats{grid-template-columns:1fr 1fr}.tb-right .em{display:none}}
 </style>
 </head>
 <body>
 
-<!-- ===================== टॉपबार ===================== -->
 <header class="topbar">
   <div class="brand">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5"/></svg>
     ट्रॅक<b>नेट</b>
-    <small>फील्ड कंट्रोल v2.4</small>
   </div>
-  <div class="tb-mid mono"><span class="ok"></span>सिस्टीम ऑनलाइन · पिंग <b id="ping">--</b></div>
-  <div class="clock"><b id="clk">--:--:--</b><span id="dte">—</span></div>
-  <button class="bell" id="bellBtn" aria-label="सूचना">
-    <svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6M10 20a2 2 0 0 0 4 0"/></svg>
-    <span class="badge" id="bellN" hidden>0</span>
-  </button>
-  <div class="admin">ॲडमिन · <b>MV</b></div>
-  <div class="alerts" id="alertsBox" hidden>
-    <h4>अलर्ट सूचना <button id="alertClear">स्पष्ट करा</button></h4>
-    <ul id="alertList"><li class="none">सध्या कोणतीही सूचना नाही.</li></ul>
+  <div class="tb-right" id="tbRight" hidden>
+    <span class="em" id="whoAmi"></span>
+    <button class="b" id="logoutBtn" style="padding:8px 12px">बाहेर</button>
   </div>
 </header>
 
-<!-- ===================== स्टॅट्स ===================== -->
-<div class="stats">
-  <div class="stat"><b id="stTotal" data-n="1248">0</b><span>एकूण नोंदणी यूजर्स</span></div>
-  <div class="stat"><b id="stActive">0</b><span>सध्या अ‍ॅक्टिव्ह</span></div>
-  <div class="stat"><b id="stCheck">0</b><span>आजचे चेक-इन</span></div>
-  <div class="stat"><b>0</b><span>परवानगीशिवाय ट्रॅकिंग — कधीच नाही</span></div>
-</div>
+<!-- ================= सेटअप स्क्रीन ================= -->
+<section id="setupView" hidden>
+  <div class="setup">
+    <h1>⚙️ वन-टाइम सेटअप (१० मिनिटं)</h1>
+    <p class="lead">हे सिस्टीम खरंच काम करण्यासाठी गुगलच्या फ्री सेवांची ३ किल्ली ही फाइलमध्ये टाकली पाहिजेत. एकदा केलं की कायमचं झालं.</p>
+    <div class="warnbox">⚠️ महत्त्वाचं: ही फाइल थेट डबल-क्लिक करून उघडली तर लॉगिन/लोकेशन चालणार नाहीत. खालील होस्टिंग पायरी <b>आधी</b> पूर्ण करा — लोकेशनसाठी HTTPS (https://...) लागतो.</div>
 
-<!-- ===================== मुख्य लेआउट ===================== -->
-<div class="layout">
-
-  <!-- डावी: यूजर यादी -->
-  <aside class="panel roster">
-    <div class="phead">यूजर यादी <small id="rCount"></small></div>
-    <div class="tools">
-      <input type="text" id="search" placeholder="नाव किंवा क्षेत्र शोधा…" aria-label="शोध">
-      <div class="chips" id="chips"></div>
+    <div class="step"><h3>पायरी १ — Firebase खाते (सर्व्हरचं काम करतं)</h3>
+      <ol>
+        <li><a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> वर तुमच्या गुगल खात्याने जा → <b>Add project</b> → नाव द्या (उदा. tracknet) → Create.</li>
+        <li>डावीकडे <b>Build → Realtime Database</b> → <b>Create Database</b> → Location: Singapore/US (काहीही) → <b>Start in test mode</b> → Enable.</li>
+        <li>Database च्या <b>Rules</b> टॅबमध्ये खालचं रुल्स पेस्ट करून <b>Publish</b> दाबा (यामुळे लिंक पाठवलेले लोक फक्त लोकेशन लिहू शकतात, वाचू शकत नाहीत; वाचण्याचा अधिकार फक्त तुमच्या लॉगिनला):</li>
+      </ol>
+      <pre id="rulesPre">{
+  "rules": {
+    "sessions": {
+      ".read": "auth != null && auth.token.firebase.sign_in_provider == 'password'",
+      "$token": { ".write": "auth != null" }
+    }
+  }
+}</pre>
+      <button class="b" id="copyRules">रुल्स कॉपी करा</button>
+      <ol start="4" style="margin-top:10px">
+        <li><b>Build → Authentication → Get started</b> → <b>Anonymous</b> चालू करा (Save) → परत या → <b>Email/Password</b> सुद्धा चालू करा (Save).</li>
+        <li>Project Settings (गिअर आयकॉन) → <b>Your apps → Web (&lt;/&gt;)</b> → नाव द्या → Register → तिथे दिसणारा <code>firebaseConfig</code> मधली <code>apiKey, authDomain, databaseURL, projectId, appId</code> ही मूल्यं खालील फाइलमध्ये टाकायची आहेत.</li>
+      </ol>
     </div>
-    <div id="ulist"></div>
-  </aside>
 
-  <!-- मध्ये: नकाशा + लॉग -->
-  <div class="centercol">
+    <div class="step"><h3>पायरी २ — Google Maps की (रिअल गुगल मॅप)</h3>
+      <ol>
+        <li><a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> → वर तोच Firebase प्रोजेक्ट निवडा.</li>
+        <li><b>APIs &amp; Services → Library</b> → "Maps JavaScript API" शोधा → <b>Enable</b>.</li>
+        <li><b>APIs &amp; Services → Credentials → Create Credentials → API key</b> → की कॉपी करा. (फ्री कोटा दरमहा पुरेसा असतो; बिलिंग जोडावी लागते पण फ्री लिमिटपर्यंत बिल येत नाही.)</li>
+      </ol>
+    </div>
+
+    <div class="step"><h3>पायरी ३ — किल्ली फाइलमध्ये टाका</h3>
+      <p style="font-size:13.5px;margin-bottom:6px">ही फाइल टेक्स्ट एडिटरमध्ये उघडा (Notepad/VS Code). सुरुवातीला हे दोन भाग दिसतील — तिथेच किल्ली टाका:</p>
+      <pre>const FIREBASE_CONFIG = { apiKey:"…", authDomain:"…", databaseURL:"…", projectId:"…", appId:"…" };
+const GM_KEY = "…";   // ← Google Maps की</pre>
+    </div>
+
+    <div class="step"><h3>पायरी ४ — होस्टिंग (फ्री, लिंक पाठवण्यासाठी आवश्यक)</h3>
+      <ol>
+        <li>या फाइलेला <code>index.html</code> असं नाव द्या.</li>
+        <li><a href="https://app.netlify.com/drop" target="_blank">app.netlify.com/drop</a> उघडा → फाइल तिथे ड्रॅग करा → ३० सेकंदात https लिंक मिळेल (उदा. <code>https://xyz.netlify.app</code>).</li>
+        <li>Firebase Console → Authentication → Settings → <b>Authorized domains → Add domain</b> → तो netlify डोमेन जोडा. (वरचं!) झालं — सिस्टीम लाईव्ह!</li>
+      </ol>
+    </div>
+
+    <button class="b pri" onclick="location.reload()" style="width:100%;padding:14px">मी सेटअप पूर्ण केलं — पुन्हा तपासा ⟳</button>
+  </div>
+</section>
+
+<!-- ================= लॉगिन ================= -->
+<section id="loginView" hidden>
+  <div class="center"><div class="card">
+    <div class="pin-ico"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="1"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+    <h2 id="lgTitle">ॲडमिन लॉगिन</h2>
+    <p class="sub" id="lgSub">एक्सेस फक्त तुमच्याकडे — ईमेल + पासवर्ड फक्त तुम्ही जाणा.</p>
+    <label>ईमेल</label><input type="email" id="lgEmail" autocomplete="username">
+    <label>पासवर्ड</label><input type="password" id="lgPass" autocomplete="current-password">
+    <div class="ferr" id="lgErr"></div>
+    <div class="fbtns"><button class="b pri" id="lgGo" style="width:100%">लॉगिन करा</button></div>
+    <div class="tog"><span id="togTxt">पहिल्यांदा वापरताय?</span> <button id="togBtn">खाते तयार करा</button></div>
+  </div></div>
+</section>
+
+<!-- ================= ॲडमिन डॅशबोर्ड ================= -->
+<div id="adminView" hidden>
+  <div class="stats">
+    <div class="stat"><b id="stAll">0</b><span>एकूण तयार केलेले लिंक</span></div>
+    <div class="stat"><b id="stLive">0</b><span>आता लाईव्ह शेअर करत आहेत</span></div>
+    <div class="stat"><b id="stStop">0</b><span>थांबवलेले / सिग्नल नाही</span></div>
+  </div>
+  <div class="layout">
     <div class="panel">
-      <div class="maphead">
-        <b>लाईव्ह नकाशा — पुणे मेट्रो क्षेत्र</b>
-        <div class="legend">
-          <span><i style="background:var(--grn)"></i>अ‍ॅक्टिव्ह</span>
-          <span><i style="background:var(--amb)"></i>आयडल</span>
-          <span><i style="background:#3a463f"></i>ऑफलाइन</span>
-          <span><i style="background:var(--red)"></i>अलर्ट</span>
+      <div class="phead">गुगल मॅप — लाईव्ह <small id="mapMode"></small>
+        <div class="maphdr">
+          <button class="b" id="fitAllBtn">सर्व दाखवा</button>
+          <button class="b" id="myLocBtn">माझी लोकेशन</button>
         </div>
       </div>
-      <div class="mapvp" id="mapvp">
-        <svg class="city" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M40 0H0V40" fill="none" stroke="rgba(53,240,140,.05)" stroke-width="1"/>
-            </pattern>
-          </defs>
-          <rect width="1000" height="620" fill="#060f0a"/>
-          <rect width="1000" height="620" fill="url(#grid)"/>
-          <!-- नदी -->
-          <path d="M-20,90 C200,150 320,60 520,125 C700,180 830,95 1020,155" fill="none" stroke="rgba(60,190,200,.10)" stroke-width="26"/>
-          <!-- रस्ते -->
-          <g stroke="rgba(53,240,140,.10)" stroke-width="10" fill="none">
-            <path d="M0,340 L1000,300"/>
-            <path d="M430,0 L465,620"/>
-            <path d="M0,120 L400,165 L700,85 L1000,140"/>
-            <path d="M0,520 L350,480 L640,545 L1000,500"/>
-          </g>
-          <g stroke="rgba(53,240,140,.05)" stroke-width="4" fill="none">
-            <path d="M200,0 C240,200 180,420 265,620"/>
-            <path d="M640,0 C600,180 700,380 660,620"/>
-            <path d="M0,230 L1000,205"/>
-            <path d="M120,0 L90,620"/>
-            <path d="M820,0 C860,220 780,440 840,620"/>
-          </g>
-          <!-- मर्यादा क्षेत्रे -->
-          <g>
-            <rect id="zA" fill="rgba(255,84,73,.07)" stroke="rgba(255,84,73,.45)" stroke-width="1.5" stroke-dasharray="7 6"/>
-            <rect id="zB" fill="rgba(255,84,73,.07)" stroke="rgba(255,84,73,.45)" stroke-width="1.5" stroke-dasharray="7 6"/>
-            <text class="zlabel" id="zAl"></text>
-            <text class="zlabel" id="zBl"></text>
-          </g>
-          <!-- क्षेत्रांची नावे -->
-          <text x="770" y="120">बाणेर</text>
-          <text x="120" y="230">पिंपरी</text>
-          <text x="560" y="250">हिंजवडी</text>
-          <text x="700" y="470">वाघोली</text>
-          <text x="230" y="500">कोथरूड</text>
-          <text x="460" y="430">शिवाजीनगर</text>
-          <text x="840" y="330">हडपसर</text>
-          <polyline id="trail" class="trailpoly" points=""/>
-        </svg>
-        <div class="radar"></div>
-        <div class="scanfx"></div>
-        <div class="chx" id="chx"></div><div class="chy" id="chy"></div>
-        <div class="coordchip" id="coordChip"></div>
-        <div class="lastev" id="lastEv"><b>लाईव्ह</b><span>कन्सोल सुरू झाला — यूजर्स ट्रॅक होत आहेत.</span></div>
-      </div>
+      <div class="mapwrap"><div id="adminMap"></div><div class="mapchip" id="mapChip"></div></div>
     </div>
-    <div class="panel feedpanel">
-      <div class="phead">लाईव्ह इव्हेंट लॉग <span class="livechip"><i></i>LIVE</span></div>
-      <ul id="feed"></ul>
-    </div>
+    <aside class="panel">
+      <div class="phead">लाईव्ह लोक <small>टॅप करून बघा</small></div>
+      <div id="peopleList"></div>
+    </aside>
   </div>
 
-  <!-- उजवी: प्रोफाइल + ॲनालिटिक्स + डेमो -->
-  <aside class="rightcol">
-    <div class="panel detail" id="detailPanel">
-      <div class="phead">यूजर प्रोफाइल <small>टॅप करून निवडा</small></div>
-      <div id="detailBody"></div>
-    </div>
-
+  <div class="linkbox">
     <div class="panel">
-      <div class="phead">वापर ॲनालिटिक्स <small>आज</small></div>
-      <div class="bars" id="hbars"></div>
-      <div class="axlab"><span>00:00</span><span>12:00</span><span>23:00</span></div>
-      <div class="asub">क्षेत्रनिहाय चेक-इन</div>
-      <div id="areas" style="padding-bottom:12px"></div>
-    </div>
-
-    <div class="panel demo">
-      <div class="phead">रिअल चेक-इन डेमो <small>GPS + कॅमेरा</small></div>
-      <div class="dbody">
-        <p>तुमच्या स्वतःच्या डिव्हाइसवर परवानगी घेऊन खरा चेक-इन चाचणी करा — लोकेशन नकाशावर दिसेल, कॅमेरा फोटो लॉगमध्ये.</p>
-        <button class="abtn pri" id="demoBtn" style="margin:12px 14px 4px;width:calc(100% - 28px)">परवानगीसह चेक-इन सुरू करा</button>
-        <small>फोटो व निर्देशांक फक्त या पेजवर राहतात — कुठेही पाठवले जात नाही.</small>
-      </div>
-    </div>
-  </aside>
-</div>
-
-<footer class="consent">
-  <b>टीप</b>
-  <span>या कंसोलमधील प्रत्येक ट्रॅकिंग फीचर यूजरच्या स्पष्ट परवानगीनेच चालतो (GPS/कॅमेरा परमिशन प्रॉम्प्ट). ब्राउझर परवानगीशिवाय डेटा देत नाही — आणि गुप्त पाहणी कायदेशीरही नाही. वापर: स्टाफ ॲटेंडन्स, डिलिव्हरी फील्ड टीम, कुटुंब लोकेटर (संमतीने).</span>
-</footer>
-
-<!-- ===================== चेक-इन मॉडल ===================== -->
-<div class="mback" id="modal" hidden>
-  <div class="modal" role="dialog" aria-modal="true">
-    <div class="mhead"><b id="mTitle">चेक-इन — परवानगी</b><button id="mClose" aria-label="बंद करा">×</button></div>
-    <div class="mbody">
-
-      <div class="mstep" id="stIntro">
-        <p>हा डेमो दाखवतो की या कंसोलचा चेक-इन फ्लो वास्तवात कसा चालतो:</p>
-        <ul>
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>लोकेशन — ब्राउझरची GPS परवानगी</li>
-          <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>कॅमेरा — चेक-इन फोटोसाठी</li>
-        </ul>
-        <div class="mpriv">गोपनीयता: फोटो आणि निर्देशांक फक्त तुमच्या ब्राउझरमध्ये राहतात. कोणताही सर्व्हर नाही, कोणतीही पाठवणूक नाही. नकारल्यास सिम्युलेटेड डेटा वापरला जाईल.</div>
-        <div class="mrow">
-          <button class="mbtn pri" id="mGo">परवानगी द्या व सुरू करा</button>
-          <button class="mbtn" id="mCancel">रद्द</button>
+      <div class="phead">🔗 लिंक तयार करा <small>हा लिंक पाठवलेला माणूस परवानगी देताच इथे दिसेल</small></div>
+      <div class="cbody">
+        <div class="crow">
+          <input id="linkName" placeholder="कोणासाठी? (उदा. बाबा, डिलिव्हरी वाला, टीम-१…)" maxlength="30">
+          <button class="b pri" id="mkLink">लिंक तयार करा</button>
+        </div>
+        <div id="linkResult" hidden>
+          <div class="lbl">✓ लिंक तयार — हा WhatsApp वर पाठवा:</div>
+          <div class="urlbox" id="linkUrl"></div>
+          <div class="rbtns">
+            <button class="b pri" id="copyNew">कॉपी करा</button>
+            <a class="b wa" id="waNew" target="_blank" rel="noopener">WhatsApp वर पाठवा</a>
+            <button class="b" id="newAgain">नवीन लिंक</button>
+          </div>
         </div>
       </div>
-
-      <div class="mstep" id="stLive" hidden>
-        <div id="camWrap">
-          <video id="camVid" autoplay playsinline muted></video>
-          <img id="camShot" alt="चेक-इन फोटो">
-          <div class="camhud"><span><i class="recd"></i>REC</span><span id="camTs"></span></div>
-        </div>
-        <div id="geoLine">लोकेशन विचारत आहोत…</div>
-        <div class="mrow">
-          <button class="mbtn" id="shotBtn">फोटो काढा</button>
-          <button class="mbtn pri" id="confirmBtn" disabled>चेक-इन कन्फर्म</button>
-        </div>
-      </div>
-
+      <div class="phead" style="border-top:1px solid var(--line2)">सर्व लिंक</div>
+      <div id="linksTable"></div>
     </div>
   </div>
 </div>
+
+<!-- ================= ट्रॅक पान (लिंक क्लिक करणाऱ्यासाठी) ================= -->
+<section id="trackView" hidden>
+  <div class="center"><div class="card consent" id="consentCard">
+    <div class="pin-ico"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></div>
+    <h2>लोकेशन शेअर करायची?</h2>
+    <p class="sub" id="trackSub">तुमची लाईव्ह लोकेशन शेअर होईल.</p>
+    <ul>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>लोकेशन फक्त लिंक पाठवणारा माणूस पाहू शकतो.</li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>फक्त लोकेशन जाते — फोटो/फाइल/पासवर्ड काहीही नाही.</li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>खाली <b>थांबवा</b> दाबल्यावर सगळं लगेच थांबतं.</li>
+    </ul>
+    <div class="ferr" id="trErr"></div>
+    <button class="b pri" id="trStart" style="width:100%;padding:14px">📍 लोकेशन शेअर करा</button>
+  </div>
+
+  <div class="card" id="shareCard" hidden>
+    <h2><span class="pul"></span>लाईव्ह शेअरिंग सुरू</h2>
+    <p class="sub" id="shName"></p>
+    <div class="kvrow"><span>निर्देशांक</span><b id="shCoord">—</b></div>
+    <div class="kvrow"><span>अचूकता</span><b id="shAcc">—</b></div>
+    <div class="kvrow"><span>अपडेट्स पाठवले</span><b id="shCnt">0</b></div>
+    <div class="kvrow"><span>शेवटचा अपडेट</span><b id="shLast">—</b></div>
+    <div id="trackMap"></div>
+    <div class="ferr" id="shErr"></div>
+    <button class="b dan" id="trStop" style="width:100%;padding:14px;margin-top:12px">■ शेअरिंग थांबवा</button>
+    <p style="font-size:12px;color:var(--mut);margin-top:10px;text-align:center">हे पान बंद केलं तरी शेअरिंग आपोआप थांबतं.</p>
+  </div></div>
+</section>
 
 <div id="toasts"></div>
 
+<!-- Firebase (गुगलचे सर्व्हर) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
-/* ============ मदतनीस ============ */
+/* ═══════════════════════════════════════════════════════════
+   ⬇⬇⬇  इथेच तुमच्या किल्ली टाका (सेटअप स्क्रीनमधील पायऱ्या)  ⬇⬇⬇
+   ═══════════════════════════════════════════════════════════ */
+const FIREBASE_CONFIG = {
+  apiKey: "येथे-टाका",
+  authDomain: "येथे-टाका",
+  databaseURL: "येथे-टाका",
+  projectId: "येथे-टाका",
+  appId: "येथे-टाका"
+};
+const GM_KEY = "येथे-टाका";  // ← Google Maps API की
+/* ═══════════════════════════════════════════════════════════ */
+
 const $=(s,c=document)=>c.querySelector(s), $$=(s,c=document)=>[...c.querySelectorAll(s)];
-const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
-const fT=d=>d.toLocaleTimeString('en-GB',{timeZone:'Asia/Kolkata',hour12:false});
-const fD=d=>d.toLocaleDateString('mr-IN',{timeZone:'Asia/Kolkata',weekday:'long',day:'numeric',month:'short'});
-const LAT0=18.5204, LNG0=73.8567; // पुणे आधारबिंदू
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fT=ts=>new Date(ts).toLocaleTimeString('en-GB',{timeZone:'Asia/Kolkata',hour12:false});
+function ago(ts){const s=(Date.now()-ts)/1e3;if(s<50)return'आत्ताच';if(s<3600)return Math.floor(s/60)+' मिनिटांपूर्वी';if(s<86400)return Math.floor(s/3600)+' तासांपूर्वी';return Math.floor(s/86400)+' दिवसांपूर्वी'}
+function toast(m){const w=$('#toasts'),t=document.createElement('div');t.className='toast';t.textContent=m;w.appendChild(t);
+  while(w.children.length>3)w.firstChild.remove();requestAnimationFrame(()=>t.classList.add('on'));
+  setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),300)},3500)}
+function copyText(t){const ok=()=>toast('✓ कॉपी झाले');
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(ok).catch(fb)}else fb();
+  function fb(){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();
+    try{document.execCommand('copy');ok()}catch(e){toast('कॉपी होऊ शकले नाही')}a.remove()}}
+function hav(a,b,c,d){const R=6371000,r=x=>x*Math.PI/180,dl=r(c-a),dg=r(d-b);
+  const h=Math.sin(dl/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 
-function toast(msg){
-  const w=$('#toasts'),t=document.createElement('div');
-  t.className='toast';t.textContent=msg;w.appendChild(t);
-  while(w.children.length>3)w.firstChild.remove();
-  requestAnimationFrame(()=>t.classList.add('on'));
-  setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),350)},3600);
+/* ================= मॅप लेयर (गुगल → नसेल तर OSM) ================= */
+const DARK=[{elementType:'geometry',stylers:[{color:'#0b1510'}]},{elementType:'labels.text.stroke',stylers:[{color:'#050806'}]},
+ {elementType:'labels.text.fill',stylers:[{color:'#7d8f84'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#16241b'}]},
+ {featureType:'road',elementType:'labels.text.fill',stylers:[{color:'#9ab0a0'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#08131c'}]},
+ {featureType:'poi',elementType:'geometry',stylers:[{color:'#0e1a13'}]},{featureType:'transit',elementType:'geometry',stylers:[{color:'#101d16'}]}];
+const MapLayer={
+ mode:null,map:null,markers:{},trails:{},acc:null,
+ init(el,cb){const fin=ok=>{if(cb){cb(ok);cb=null}};
+   (GM_KEY&&!/येथे/.test(GM_KEY))?this._g(el,fin):this._l(el,fin)},
+ _g(el,fin){let done=false;const t=setTimeout(()=>{if(!done){done=true;fin(false)}},8000);
+   window.__gcb=()=>{if(done)return;done=true;clearTimeout(t);this.mode='g';
+     this.map=new google.maps.Map(el,{center:{lat:18.5204,lng:73.8567},zoom:13,styles:DARK,
+       disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy'});fin(true)};
+   const s=document.createElement('script');s.async=true;
+   s.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(GM_KEY)+'&v=weekly&callback=__gcb';
+   s.onerror=()=>{if(!done){done=true;clearTimeout(t);fin(false)}};document.head.appendChild(s)},
+ _l(el,fin){const css=document.createElement('link');css.rel='stylesheet';
+   css.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';document.head.appendChild(css);
+   const s=document.createElement('script');s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+   s.onload=()=>{this.mode='l';this.map=L.map(el,{zoomControl:true}).setView([18.5204,73.8567],13);
+     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(this.map);fin(true)};
+   s.onerror=()=>fin(false);document.head.appendChild(s)},
+ marker(id,la,ln,color,ch,onClick){const pos=this.mode==='g'?{lat:la,lng:ln}:[la,ln];
+   if(this.markers[id]){this.mode==='g'?this.markers[id].setPosition(pos):this.markers[id].setLatLng(pos);return}
+   if(this.mode==='g'){this.markers[id]=new google.maps.Marker({position:pos,map:this.map,
+     icon:{path:google.maps.SymbolPath.CIRCLE,scale:10,fillColor:color,fillOpacity:1,strokeColor:'#06130b',strokeWeight:2},
+     label:{text:(ch||'•').toUpperCase(),color:'#06130b',fontSize:'11px',fontWeight:'700'}});
+     this.markers[id].addListener('click',onClick)}
+   else{this.markers[id]=L.circleMarker(pos,{radius:10,fillColor:color,color:'#06130b',weight:2,fillOpacity:1}).addTo(this.map).on('click',onClick)}},
+ trail(id,pts,color){const arr=this.mode==='g'?pts.map(p=>({lat:p[0],lng:p[1]})):pts;
+   if(this.trails[id]){this.mode==='g'?this.trails[id].setPath(arr):this.trails[id].setLatLngs(arr);return}
+   if(this.mode==='g')this.trails[id]=new google.maps.Polyline({path:arr,map:this.map,strokeColor:color,strokeOpacity:.85,strokeWeight:3});
+   else this.trails[id]=L.polyline(arr,{color,weight:3,opacity:.85}).addTo(this.map)},
+ acc(la,ln,r,color){this.accClear();const c=this.mode==='g'?{lat:la,lng:ln}:[la,ln];
+   if(this.mode==='g')this.acc=new google.maps.Circle({map:this.map,center:c,radius:r,strokeColor:color,strokeWeight:1,fillColor:color,fillOpacity:.08});
+   else this.acc=L.circle(c,{radius:r,color,weight:1,fillOpacity:.08}).addTo(this.map)},
+ accClear(){if(this.acc){this.mode==='g'?this.acc.setMap(null):this.map.removeLayer(this.acc);this.acc=null}},
+ remove(id){if(this.markers[id]){this.mode==='g'?this.markers[id].setMap(null):this.map.removeLayer(this.markers[id]);delete this.markers[id]}
+   if(this.trails[id]){this.mode==='g'?this.trails[id].setMap(null):this.map.removeLayer(this.trails[id]);delete this.trails[id]}},
+ focus(la,ln,z=16){this.mode==='g'?(this.map.panTo({lat:la,lng:ln}),this.map.setZoom(z)):this.map.setView([la,ln],z)},
+ fitAll(pts){if(!pts.length||!this.map)return;
+   if(this.mode==='g'){const b=new google.maps.LatLngBounds();pts.forEach(p=>b.extend({lat:p[0],lng:p[1]}));this.map.fitBounds(b,60)}
+   else this.map.fitBounds(L.latLngBounds(pts).pad(.25))}
+};
+
+/* ================= राउटिंग ================= */
+const CFG_OK=FIREBASE_CONFIG.apiKey&&!/येथे/.test(FIREBASE_CONFIG.apiKey)&&FIREBASE_CONFIG.databaseURL&&!/येथे/.test(FIREBASE_CONFIG.databaseURL);
+const hp=new URLSearchParams(location.hash.slice(1));
+const TRACK_TOK=hp.get('track');
+const VIEWS=['setupView','loginView','adminView','trackView'];
+function show(id){VIEWS.forEach(v=>$('#'+v).hidden=(v!==id));$('#tbRight').hidden=(id!=='adminView')}
+
+let auth=null,db=null;
+if(!CFG_OK){show('setupView')}
+else{
+  firebase.initializeApp(FIREBASE_CONFIG);auth=firebase.auth();db=firebase.database();
+  if(TRACK_TOK)trackFlow();else adminFlow();
 }
-function countUp(el,target){
-  const t0=performance.now(),dur=1200;
-  (function s(t){const p=Math.min(1,(t-t0)/dur);
-    el.textContent=Math.round(target*(1-Math.pow(1-p,3))).toLocaleString('en-IN');
-    if(p<1)requestAnimationFrame(s);})(t0);
+
+/* ═══════════ ॲडमिन ═══════════ */
+let adminOn=false,SESSIONS={},regMode=false;
+function authErr(e){const c=(e&&e.code)||'';return{
+ 'auth/email-already-in-use':'हा ईमेल आधीच नोंदलेला आहे — लॉगिन करा.',
+ 'auth/invalid-email':'ईमेल चुकीचा आहे.','auth/weak-password':'पासवर्ड कमीत कमी ६ अक्षरे ठेवा.',
+ 'auth/invalid-credential':'ईमेल किंवा पासवर्ड चुकीचा.','auth/user-not-found':'ईमेल किंवा पासवर्ड चुकीचा.',
+ 'auth/wrong-password':'ईमेल किंवा पासवर्ड चुकीचा.',
+ 'auth/unauthorized-domain':'हे डोमेन Firebase मध्ये जोडा: Authentication → Settings → Authorized domains.',
+ 'auth/operation-not-allowed':'Firebase Console मध्ये ही पद्धत चालू करा (Authentication → Sign-in method).'}[c]||('चूक: '+(c||'अज्ञात'))}
+
+function adminFlow(){
+  show('loginView');
+  $('#togBtn').onclick=()=>{regMode=!regMode;
+    $('#lgTitle').textContent=regMode?'ॲडमिन खाते तयार करा':'ॲडमिन लॉगिन';
+    $('#lgGo').textContent=regMode?'खाते तयार करा':'लॉगिन करा';
+    $('#togTxt').textContent=regMode?'आधीच खाते आहे?':'पहिल्यांदा वापरताय?';
+    $('#togBtn').textContent=regMode?'लॉगिन करा':'खाते तयार करा';$('#lgErr').textContent=''};
+  $('#lgGo').onclick=async()=>{
+    const em=$('#lgEmail').value.trim(),pw=$('#lgPass').value;
+    if(!em||!pw){$('#lgErr').textContent='ईमेल व पासवर्ड भरा.';return}
+    try{regMode?await auth.createUserWithEmailAndPassword(em,pw):await auth.signInWithEmailAndPassword(em,pw)}
+    catch(e){$('#lgErr').textContent=authErr(e)}};
+  auth.onAuthStateChanged(u=>{
+    if(u&&!u.isAnonymous){enterAdmin(u)}
+    else{if(u&&u.isAnonymous)auth.signOut();if(!adminOn)show('loginView')}});
+  $('#logoutBtn').onclick=()=>auth.signOut();
 }
+function enterAdmin(u){
+  adminOn=true;show('adminView');$('#whoAmi').textContent=u.email;
+  MapLayer.init($('#adminMap'),ok=>{
+    $('#mapChip').textContent=ok?(MapLayer.mode==='g'?'● GOOGLE MAP — LIVE':'● गुगल की नाही — OSM नकाशा'):'नकाशा लोड होऊ शकला नाही';
+    renderMap()});
+  db.ref('sessions').on('value',s=>{SESSIONS=s.val()||{};renderAll()});
+  db.ref('sessions').on('child_removed',s=>{if(!s)delete SESSIONS[s]; /* safety */});
+  /* DB आकार नियंत्रण: जुन्या ट्रेल पॉइंट काढणे */
+  setInterval(()=>{Object.entries(SESSIONS).forEach(([t,s])=>{if(!s.path)return;const ks=Object.keys(s.path);
+    if(ks.length>320)ks.slice(0,ks.length-300).forEach(k=>db.ref('sessions/'+t+'/path/'+k).remove())})},180000);
+  /* नकाशा सुरुवातीला तुमच्या क्षेत्रावर */
+  navigator.geolocation&&navigator.geolocation.getCurrentPosition(
+    p=>MapLayer.focus(p.coords.latitude,p.coords.longitude,14),()=>{},{enableHighAccuracy:false,timeout:6000});
+  setInterval(()=>{if(adminOn)renderAll()},30000); // "किती वेळापूर्वी" ताजे
+  $('#myLocBtn').onclick=()=>navigator.geolocation&&navigator.geolocation.getCurrentPosition(
+    p=>MapLayer.focus(p.coords.latitude,p.coords.longitude,15),()=>toast('लोकेशन परवानगी नाही'));}
+function isLive(s){return s.loc&&!s.stopped&&(Date.now()-s.loc.ts)<180000}
+const PALETTE=['#35f08c','#ffb454','#4cc9ff','#ff7ab6','#e8ff17','#b78bff','#ff8a5c','#7dffd4'];
 
-/* ============ डेटा (सिम्युलेटेड) ============ */
-const USERS=[
- {id:'USR-1101',name:'अथर्व पाटील',area:'बाणेर',dev:'Redmi Note 13 Pro',os:'Android 14',net:'5G',bat:87,x:76,y:20,status:'active',kmh:26},
- {id:'USR-1102',name:'सायली देशमुख',area:'कोथरूड',dev:'iPhone 13',os:'iOS 17',net:'5G',bat:64,x:24,y:78,status:'active',kmh:14},
- {id:'USR-1103',name:'ओंकार जाधव',area:'हिंजवडी',dev:'OnePlus Nord 3',os:'Android 14',net:'5G',bat:45,x:55,y:38,status:'active',kmh:33},
- {id:'USR-1104',name:'पूजा कुलकर्णी',area:'शिवाजीनगर',dev:'Samsung A54',os:'Android 14',net:'4G',bat:92,x:46,y:60,status:'idle',kmh:1},
- {id:'USR-1105',name:'वेदांत शिंदे',area:'वाघोली',dev:'Vivo V29',os:'Android 13',net:'4G',bat:18,x:70,y:74,status:'active',kmh:19},
- {id:'USR-1106',name:'अनन्या जोशी',area:'कल्याणीनगर',dev:'Pixel 7a',os:'Android 14',net:'5G',bat:73,x:60,y:52,status:'idle',kmh:0},
- {id:'USR-1107',name:'रोहन चव्हाण',area:'पिंपरी',dev:'Realme 12',os:'Android 14',net:'4G',bat:55,x:14,y:32,status:'offline',kmh:0},
- {id:'USR-1108',name:'इशिता राणे',area:'कर्वेनगर',dev:'iPhone SE 2022',os:'iOS 17',net:'5G',bat:38,x:34,y:86,status:'active',kmh:9},
- {id:'USR-1109',name:'कबीर निकम',area:'आंबेगाव',dev:'Motorola G84',os:'Android 13',net:'4G',bat:81,x:88,y:46,status:'offline',kmh:0},
- {id:'USR-1110',name:'तन्मय देसाई',area:'देहू रोड',dev:'iQOO Z9',os:'Android 14',net:'5G',bat:29,x:84,y:60,status:'active',kmh:37},
- {id:'USR-1111',name:'मृणाल गायकवाड',area:'चाकण',dev:'Samsung M34',os:'Android 14',net:'4G',bat:66,x:30,y:12,status:'idle',kmh:0},
- {id:'USR-1112',name:'स्वरा कांबळे',area:'हडपसर',dev:'Nothing Phone 2a',os:'Android 14',net:'5G',bat:51,x:86,y:32,status:'active',kmh:22}
-];
-USERS.forEach(u=>{u.tx=u.x;u.ty=u.y;u.spd=.7+Math.random()*.8;u.lastAlert=0;u.hist=[];u.live=false;});
+function renderAll(){
+  const toks=Object.keys(SESSIONS).sort((a,b)=>(SESSIONS[b].created||0)-(SESSIONS[a].created||0));
+  toks.forEach((t,i)=>SESSIONS[t]._c=SESSIONS[t].stopped?'#4a5a50':PALETTE[i%PALETTE.length]);
+  $('#stAll').textContent=toks.length;
+  $('#stLive').textContent=toks.filter(t=>isLive(SESSIONS[t])).length;
+  $('#stStop').textContent=toks.filter(t=>!isLive(SESSIONS[t])).length;
+  renderList(toks);renderLinks(toks);renderMap(toks);
+}
+function linkOf(t){const n=SESSIONS[t].name||'';return location.origin+location.pathname+'#track='+t+'&n='+encodeURIComponent(n)}
+function renderList(toks){
+  const order=toks.slice().sort((a,b)=>(isLive(SESSIONS[b])?1:0)-(isLive(SESSIONS[a])?1:0));
+  $('#peopleList').innerHTML=order.length?order.map(t=>{const s=SESSIONS[t];
+    const st=isLive(s)?'live':(s.stopped?'stop':'stale');
+    const stx=isLive(s)?'लाईव्ह · '+ago(s.loc.ts):(s.stopped?'थांबवले':'सिग्नल नाही · '+(s.loc?ago(s.loc.ts):'—'));
+    return `<div class="prow" data-t="${t}">
+      <span class="dot ${st}"></span>
+      <span class="pmain"><b>${esc(s.name||'अनामित')}</b><small>${stx}${s.loc?' · '+Math.round(s.loc.ac||0)+'मी'+(s.loc.sp?' · '+Math.round(s.loc.sp*3.6)+'km/h':''):''}</small></span>
+      <span class="pacts">
+        ${s.loc?`<button class="ibtn" data-act="view" title="नकाशावर बघा"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></button>`:''}
+        <button class="ibtn" data-act="copy" title="लिंक कॉपी"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="1"/><path d="M5 15V5a1 1 0 0 1 1-1h9"/></svg></button>
+        <button class="ibtn" data-act="stop" title="${s.stopped?'पुन्हा सुरू':'थांबवा'}">${s.stopped?'<svg viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>':'<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12"/></svg>'}</button>
+        <button class="ibtn" data-act="del" title="डिलीट"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/></svg></button>
+      </span></div>`}).join(''):
+    '<div class="empty" style="padding:14px">अजून कोणी नाही. खालून लिंक तयार करून पाठवा.</div>';
+}
+function renderLinks(toks){
+  $('#linksTable').innerHTML=toks.length?toks.map(t=>{const s=SESSIONS[t];
+    return `<div class="lrow" data-t="${t}">
+      <span class="dot ${isLive(s)?'live':(s.stopped?'stop':'stale')}" style="width:8px;height:8px;border-radius:50%;flex:none"></span>
+      <span class="nm">${esc(s.name||'—')}</span>
+      <span class="lk">${esc(linkOf(t))}</span>
+      <button class="ibtn" data-act="copy" title="कॉपी"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="1"/><path d="M5 15V5a1 1 0 0 1 1-1h9"/></svg></button>
+      <a class="ibtn" data-act="wa" title="WhatsApp" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('लोकेशन शेअर करा — '+linkOf(t))}"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-4.2-7.6L21 3l-1.2 4.2A9 9 0 0 1 21 12z"/></svg></a>
+      <button class="ibtn" data-act="del" title="डिलीट"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/></svg></button>
+    </div>`}).join(''):'<div class="empty">अजून एकही लिंक नाही.</div>';
+}
+function renderMap(toks){
+  toks=toks||Object.keys(SESSIONS);
+  if(!MapLayer.mode)return;
+  const pts=[];
+  toks.forEach(t=>{const s=SESSIONS[t];
+    if(s.loc){MapLayer.marker(t,s.loc.la,s.loc.ln,s._c,(s.name||'?')[0],()=>focusTok(t));
+      pts.push([s.loc.la,s.loc.ln]);
+      if(s.path){const p=Object.values(s.path).sort((a,b)=>a.ts-b.ts).map(x=>[x.la,x.ln]);
+        if(p.length>1)MapLayer.trail(t,p,s._c)}}
+    else MapLayer.remove(t)});
+}
+function focusTok(t){const s=SESSIONS[t];if(!s||!s.loc)return;
+  MapLayer.focus(s.loc.la,s.loc.ln,16);MapLayer.acc(s.loc.la,s.loc.ln,Math.min(s.loc.ac||30,300),s._c);
+  const row=$(`.prow[data-t="${t}"]`);if(row)row.scrollIntoView({block:'nearest',behavior:'smooth'})}
+ $('#fitAllBtn').onclick=()=>MapLayer.fitAll(Object.values(SESSIONS).filter(s=>s.loc).map(s=>[s.loc.la,s.loc.ln]));
 
-const ZONES=[
- {name:'मर्यादा क्षेत्र A — डेपो',x:58,y:8,w:26,h:16},
- {name:'मर्यादा क्षेत्र B — सर्व्हर यार्ड',x:10,y:60,w:18,h:20}
-];
-const AREAS=[['बाणेर',142],['हिंजवडी',118],['कोथरूड',97],['शिवाजीनगर',81],['वाघोली',64]];
-let checkins=86, sel=null;
-
-/* मर्यादा क्षेत्रे नकाशावर (0-100 → viewBox) */
-ZONES.forEach((z,i)=>{
-  const r=$('#z'+(i?'B':'A'));
-  r.setAttribute('x',z.x*10);r.setAttribute('y',z.y*6.2);
-  r.setAttribute('width',z.w*10);r.setAttribute('height',z.h*6.2);
-  const t=$('#z'+(i?'Bl':'Al'));
-  t.setAttribute('x',z.x*10+8);t.setAttribute('y',z.y*6.2+20);t.textContent=z.name;
-});
-
-/* ============ नकाशा: पिन तयार ============ */
-const mapvp=$('#mapvp');
-USERS.forEach(u=>{
-  const p=document.createElement('div');
-  p.className='pin '+u.status;p.dataset.id=u.id;
-  p.innerHTML='<span class="ring"></span><span class="core"></span><span class="ptag">'+u.name+'</span>';
-  p.style.left=u.x+'%';p.style.top=u.y+'%';
-  p.addEventListener('click',()=>select(u.id));
-  mapvp.appendChild(p);u.el=p;
-});
-/* "तुम्ही" पिन — रिअल चेक-इनसाठी */
-const youPin=document.createElement('div');
-youPin.className='pin you';youPin.hidden=true;
-youPin.innerHTML='<span class="ring"></span><span class="core"></span><span class="ptag">तुम्ही</span>';
-mapvp.appendChild(youPin);
-
-/* ============ हालचाल + रडार सिम्युलेशन ============ */
-function frame(){
-  USERS.forEach(u=>{
-    if(u.status==='offline')return;
-    const k=.014*(u.live?1.9:1)*u.spd;
-    u.x+=(u.tx-u.x)*k;u.y+=(u.ty-u.y)*k;
-    u.el.style.left=u.x+'%';u.el.style.top=u.y+'%';
+/* लिंक तयार करणे (तुम्ही मागितलेला खालचा बॉक्स) */
+let lastTok=null;
+ $('#mkLink').onclick=async()=>{
+  const nm=$('#linkName').value.trim();
+  if(!nm){toast('आधी नाव लिहा — कोणासाठी हा लिंक?');$('#linkName').focus();return}
+  const abc='abcdefghjkmnpqrstuvwxyz23456789';
+  const tok=Array.from(crypto.getRandomValues(new Uint8Array(10))).map(b=>abc[b%abc.length]).join('');
+  await db.ref('sessions/'+tok).set({name:nm,created:Date.now(),owner:auth.currentUser?auth.currentUser.uid:'',stopped:false});
+  lastTok=tok;
+  const url=linkOf(tok);
+  $('#linkResult').hidden=false;$('#linkUrl').textContent=url;
+  $('#waNew').href='https://wa.me/?text='+encodeURIComponent('नमस्कार! मला तुमची लोकेशन पाहायची आहे — कृपया या लिंकवर क्लिक करून परवानगी द्या: '+url);
+  $('#copyNew').onclick=()=>copyText(url);
+  $('#linkName').value='';toast('✓ लिंक तयार — खाली दिसतेय');
+};
+ $('#newAgain').onclick=()=>{$('#linkResult').hidden=true;lastTok=null};
+['peopleList','linksTable'].forEach(id=>{
+  $('#'+id).addEventListener('click',async e=>{
+    const b=e.target.closest('[data-act]');if(!b)return;
+    const t=b.closest('[data-t]').dataset.t,act=b.dataset.act;
+    if(act==='copy')copyText(linkOf(t));
+    if(act==='view')focusTok(t);
+    if(act==='stop')await db.ref('sessions/'+t).update({stopped:!SESSIONS[t].stopped});
+    if(act==='del'&&confirm('«'+(SESSIONS[t].name||'')+'» चा लिंक व सर्व डेटा डिलीट करायचा?')){await db.ref('sessions/'+t).remove();toast('डिलीट झाले')}
   });
-  requestAnimationFrame(frame);
-}
-frame();
-
-setInterval(()=>{ // नवीन लक्ष्ये + स्टेटस बदल
-  USERS.forEach(u=>{
-    if(u.status==='offline')return;
-    const d=Math.hypot(u.tx-u.x,u.ty-u.y);
-    if(d<2.5||Math.random()<.25){
-      u.tx=clamp(u.x+(Math.random()*32-16),6,94);
-      u.ty=clamp(u.y+(Math.random()*22-11),8,92);
-    }
-    if(Math.random()<.05)applyStatus(u,u.status==='active'?'idle':'active');
-  });
-},4000);
-
-/* निवडलेल्या यूजरचा ट्रेल */
-setInterval(()=>{
-  if(!sel)return;
-  sel.hist.push([sel.x,sel.y]);
-  if(sel.hist.length>36)sel.hist.shift();
-  $('#trail').setAttribute('points',sel.hist.map(p=>(p[0]*10)+','+(p[1]*6.2)).join(' '));
-},650);
-
-/* ============ स्टेटस / यादी ============ */
-function applyStatus(u,st){
-  u.status=st;
-  u.el.classList.remove('active','idle','offline');u.el.classList.add(st);
-  if(sel===u)renderDetail();
-  renderRoster();
-}
-function activeCount(){return USERS.filter(u=>u.status==='active').length}
-
-let chipF='all',q='';
-function renderRoster(){
-  const list=USERS.filter(u=>(chipF==='all'||u.status===chipF)&&(u.name.includes(q)||u.area.includes(q)));
-  $('#ulist').innerHTML=list.map(u=>`
-    <button class="ritem ${sel===u?'sel':''} ${u.status==='offline'?'off':''}" data-id="${u.id}">
-      <span class="ava">${u.name[0]}</span>
-      <span class="rmain"><b>${u.name}</b><small>${u.area} · ${u.dev}</small></span>
-      <span class="rend"><small>${u.bat}%</small><i class="sdot ${u.status}"></i></span>
-    </button>`).join('');
-  $('#rCount').textContent=USERS.length+' एकूण';
-  $$('#chips button').forEach(b=>{
-    const f=b.dataset.f;
-    const n=f==='all'?USERS.length:USERS.filter(u=>u.status===f).length;
-    b.textContent=b.dataset.l+' ('+n+')';
-    b.classList.toggle('on',f===chipF);
-  });
-  $('#stActive').textContent=activeCount();
-}
- $('#chips').innerHTML=[['all','सर्व'],['active','अ‍ॅक्टिव्ह'],['idle','आयडल'],['offline','ऑफलाइन']]
-  .map(([f,l])=>`<button data-f="${f}" data-l="${l}">${l}</button>`).join('');
- $('#chips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;chipF=b.dataset.f;renderRoster()});
- $('#search').addEventListener('input',e=>{q=e.target.value.trim();renderRoster()});
- $('#ulist').addEventListener('click',e=>{const b=e.target.closest('.ritem');if(b)select(b.dataset.id)});
-
-/* ============ प्रोफाइल पॅनेल ============ */
-function latlng(u){return{lat:LAT0+(50-u.y)*.05,lng:LNG0+(u.x-50)*.05}}
-function renderDetail(){
-  const b=$('#detailBody');
-  if(!sel){b.innerHTML='<p style="padding:16px;color:var(--mut)">डावीकडून यूजर निवडा.</p>';return}
-  const {lat,lng}=latlng(sel);
-  const bc=sel.bat<20?'low':sel.bat<40?'warn':'';
-  b.innerHTML=`
-  <div class="dhead">
-    <span class="ava">${sel.name[0]}</span>
-    <div><h3>${sel.name}</h3><span class="mono">${sel.id} · ${sel.area}</span></div>
-    <span class="stchip ${sel.status}">${sel.status==='active'?'अ‍ॅक्टिव्ह':sel.status==='idle'?'आयडल':'ऑफलाइन'}</span>
-  </div>
-  <div class="dbody">
-    <div class="kv"><span>डिव्हाइस</span><b>${sel.dev}</b></div>
-    <div class="kv"><span>ऑपरेटिंग सिस्टीम</span><b>${sel.os}</b></div>
-    <div class="kv"><span>नेटवर्क</span><b>${sel.net}</b></div>
-    <div class="kv"><span>बॅटरी</span><b>${sel.bat}%<span class="batbar ${bc}"><i style="width:${sel.bat}%"></i></span></b></div>
-    <div class="kv"><span>अंदाजित स्पीड</span><b id="dSpd">${sel.kmh} km/h</b></div>
-    <div class="kv"><span>लास्ट पिंग</span><b id="dPing">${fT(new Date())}</b></div>
-    <div class="locbox">
-      <small>सध्याचे निर्देशांक</small>
-      <div class="coords" id="dCoords">${lat.toFixed(4)}° N · ${lng.toFixed(4)}° E</div>
-      <p>${sel.area} · अचूकता ±${8+Math.floor(Math.random()*10)} मी · GPS लॉक</p>
-    </div>
-    <div class="tlhead">आजची ॲक्टिव्हिटी टाइमलाइन</div>
-    <ul class="tline" id="dTl"></ul>
-  </div>
-  <div class="dacts">
-    <button class="abtn ${sel.live?'pri':''}" id="aLive">${sel.live?'लाईव्ह बंद करा':'लाईव्ह ट्रॅक पाहा'}</button>
-    <button class="abtn" id="aRef">लोकेशन रिफ्रेश</button>
-    <button class="abtn" id="aPing">पिंग पाठवा</button>
-  </div>`;
-  const tl=[],now=Date.now();let t=now;
-  ['लोकेशन अपडेट — '+sel.area,'ॲप सेशन सुरू','डिव्हाइस अनलॉक','ॲक्टिव्हिटी: रिपोर्ट सबमिट','ऑनलाइन आला']
-    .forEach(tx=>{t-=(4+Math.random()*22)*60000;tl.push({t:new Date(t),tx})});
-  $('#dTl').innerHTML=tl.map(x=>`<li><time>${fT(x.t).slice(0,5)}</time>${x.tx}</li>`).join('');
-  $('#aLive').onclick=()=>{sel.live=!sel.live;sel.el.classList.toggle('sel',true);
-    toast(sel.live?sel.name+' — लाईव्ह ट्रॅकिंग सुरू (हाय-फ्रिक्वेन्सी)':sel.name+' — लाईव्ह ट्रॅकिंग बंद');renderDetail()};
-  $('#aRef').onclick=()=>{const c=$('#dCoords');if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash')}
-    addEvent('लोकेशन रिफ्रेश — '+sel.name,'info');toast(sel.name+' ची लोकेशन ताजी केली')};
-  $('#aPing').onclick=()=>{addEvent('ॲडमिन पिंग → '+sel.name,'amb');
-    toast(sel.name+' यांच्या डिव्हाइसला पिंग गेला — उत्तर ॲपमध्ये दिसेल')};
-}
-function select(id){
-  sel=USERS.find(u=>u.id===id)||null;
-  USERS.forEach(u=>u.el.classList.toggle('sel',u===sel));
-  if(!sel){$('#trail').setAttribute('points','')}
-  else{sel.hist=[];$('#trail').setAttribute('points','')}
-  renderDetail();renderRoster();
-}
-
-/* ============ इव्हेंट लॉग / अलर्ट ============ */
-const evts=[];
-function addEvent(text,type='info',thumb){
-  const t=new Date();evts.unshift({t,text,type,thumb});
-  if(evts.length>40)evts.pop();
-  $('#feed').innerHTML=evts.slice(0,30).map(e=>`
-    <li class="${e.type==='alert'?'al':e.type==='amb'?'amb':''}">
-      <time>${fT(e.t)}</time><i class="fdot"></i><span>${e.text}</span>${e.thumb?`<img class="fthumb" src="${e.thumb}" alt="चेक-इन फोटो">`:''}
-    </li>`).join('');
-  const le=$('#lastEv');
-  le.classList.toggle('al',type==='alert');
-  le.innerHTML='<b>'+fT(t).slice(0,5)+'</b><span>'+text+'</span>';
-  le.classList.remove('slide');void le.offsetWidth;le.classList.add('slide');
-  if(type==='alert'){
-    bellN++;updBell();
-    const li=document.createElement('li');li.innerHTML='<time>'+fT(t).slice(0,5)+'</time>'+text;
-    const none=$('#alertList .none');if(none)none.remove();
-    $('#alertList').prepend(li);
-    toast('अलर्ट: '+text);
-  }
-}
-let bellN=0;
-function updBell(){const b=$('#bellN');b.hidden=bellN===0;b.textContent=bellN}
- $('#bellBtn').addEventListener('click',()=>{
-  const bx=$('#alertsBox');bx.hidden=!bx.hidden;
+  $('#'+id).addEventListener('click',e=>{const a=e.target.closest('a[data-act="wa"]');if(a)return});
 });
- $('#alertClear').addEventListener('click',()=>{bellN=0;updBell();$('#alertList').innerHTML='<li class="none">सध्या कोणतीही सूचना नाही.</li>'});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('#alertsBox').hidden=true;closeModal()}});
+ $('#copyRules').onclick=()=>copyText($('#rulesPre').textContent);
 
-/* मर्यादा क्षेत्र तपासणी */
-setInterval(()=>{
-  USERS.forEach(u=>{
-    if(u.status==='offline')return;
-    const z=ZONES.find(z=>u.x>z.x&&u.x<z.x+z.w&&u.y>z.y&&u.y<z.y+z.h);
-    if(z&&Date.now()-u.lastAlert>45000){
-      u.lastAlert=Date.now();
-      addEvent('मर्यादा क्षेत्रात प्रवेश — '+u.name+' ('+z.name+')','alert');
-      u.el.classList.add('alert');setTimeout(()=>u.el.classList.remove('alert'),4500);
-    }
-  });
-},3000);
-
-/* यादृच्छिक ॲक्टिव्हिटी इव्हेंट */
-setInterval(()=>{
-  const live=USERS.filter(u=>u.status!=='offline');if(!live.length)return;
-  const u=live[Math.floor(Math.random()*live.length)];
-  const r=Math.random();
-  if(r<.3){checkins++;$('#stCheck').textContent=checkins.toLocaleString('en-IN');
-    addEvent('चेक-इन पूर्ण — '+u.area,'info');}
-  else if(r<.7)addEvent('लोकेशन अपडेट — '+u.name+' ('+u.area+')','info');
-  else if(r<.9)addEvent('डिव्हाइस अनलॉक — '+u.dev,'info');
-  else addEvent('ॲप सेशन सुरू — '+u.name,'info');
-  if(Math.random()<.15&&u.status!=='offline'){u.bat=Math.max(5,u.bat-1);if(sel===u)renderDetail();renderRoster()}
-},5000);
-
-/* ============ घड्याळ / पिंग / स्पीड ============ */
-setInterval(()=>{
-  const n=new Date();
-  $('#clk').textContent=fT(n);$('#dte').textContent=fD(n);
-  $('#ping').textContent=(18+Math.floor(Math.random()*24))+'ms';
-  if(sel){const p=$('#dPing');if(p)p.textContent=fT(n);
-    const s=$('#dSpd');if(s&&sel.status!=='offline'){sel.kmh=Math.max(0,sel.kmh+Math.round(Math.random()*8-4));s.textContent=sel.kmh+' km/h'}}
-},1000);
-
-/* ============ कर्सर क्रॉसहेअर ============ */
-mapvp.addEventListener('mousemove',e=>{
-  const r=mapvp.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
-  $('#chx').style.left=x+'px';$('#chy').style.top=y+'px';
-  $('#chx').style.display=$('#chy').style.display='block';
-  const c=$('#coordChip');c.style.display='block';
-  c.textContent='X '+(x/r.width*100).toFixed(1)+' · Y '+(y/r.height*100).toFixed(1);
-});
-mapvp.addEventListener('mouseleave',()=>{
-  $('#chx').style.display=$('#chy').style.display=$('#coordChip').style.display='none';
-});
-
-/* ============ ॲनालिटिक्स ============ */
-const HVALS=[8,6,5,4,4,7,14,26,38,44,52,58,63,60,55,50,46,42,35,30,26,20,15,10];
-const hr=new Date().getHours();
- $('#hbars').innerHTML=HVALS.map((v,i)=>`<span class="${i===hr?'cur':''}" style="height:${v}%" title="${i}:00 — ${v} यूजर्स"></span>`).join('');
-const mx=Math.max(...AREAS.map(a=>a[1]));
- $('#areas').innerHTML=AREAS.map(([n,c])=>`
-  <div class="arow"><span>${n}</span><span class="tk"><i style="width:${c/mx*100}%"></i></span><b>${c}</b></div>`).join('');
-
-/* ============ रिअल चेक-इन डेमो (परवानगीसह) ============ */
-const modal=$('#modal'),camWrap=$('#camWrap'),camVid=$('#camVid'),camShot=$('#camShot');
-let stream=null,gpos=null,sim=false,shot=null;
-function openModal(){modal.hidden=false;$('#stIntro').hidden=false;$('#stLive').hidden=true;
-  $('#mTitle').textContent='चेक-इन — परवानगी';}
-function closeModal(){
-  modal.hidden=true;
-  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
-  camWrap.classList.remove('on','shot','off');
-  camVid.srcObject=null;shot=null;gpos=null;sim=false;
+/* ═══════════ ट्रॅक पान (लिंक क्लिक करणारा माणूस) ═══════════ */
+const T={tok:null,name:'',ref:null,watch:null,lastSent:0,la:null,ln:null,cnt:0,trail:[],mapReady:false};
+function trackFlow(){
+  show('trackView');T.tok=TRACK_TOK;T.name=hp.get('n')||'';
+  $('#trackSub').textContent=T.name?`तुमची लोकेशन «${T.name}» या नावाने शेअर होईल.`:'तुमची लाईव्ह लोकेशन शेअर होईल.';
+  $('#trStart').onclick=async()=>{
+    $('#trErr').textContent='';
+    try{if(!auth.currentUser)await auth.signInAnonymously()}
+    catch(e){$('#trErr').textContent=authErr(e);return}
+    T.ref=db.ref('sessions/'+T.tok);
+    T.ref.update({active:true,stopped:false,name:T.name||'अनामित',started:Date.now()});
+    T.ref.onDisconnect().update({active:false,stopped:true}); // पान बंद → आपोआप थांब
+    $('#consentCard').hidden=true;$('#shareCard').hidden=false;
+    $('#shName').textContent=T.name?`«${T.name}» या नावाने शेअर होत आहे.`:'शेअर होत आहे…';
+    try{navigator.wakeLock&&await navigator.wakeLock.request('screen')}catch(e){}
+    startWatch();
+  };
+  $('#trStop').onclick=()=>stopShare(true);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){try{navigator.wakeLock&&navigator.wakeLock.request('screen')}catch(e){}}});
 }
- $('#demoBtn').addEventListener('click',openModal);
- $('#mClose').addEventListener('click',closeModal);
- $('#mCancel').addEventListener('click',closeModal);
- $('#mGo').addEventListener('click',async()=>{
-  $('#stIntro').hidden=true;$('#stLive').hidden=true;$('#stLive').hidden=false;
-  $('#mTitle').textContent='चेक-इन — लाईव्ह';
-  $('#geoLine').textContent='लोकेशन विचारत आहोत…';$('#geoLine').classList.remove('warn');
-  $('#confirmBtn').disabled=true;$('#shotBtn').textContent='फोटो काढा';
-  camShot.removeAttribute('src');
-  /* कॅमेरा */
-  try{
-    stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:480},facingMode:'user'},audio:false});
-    camVid.srcObject=stream;camWrap.classList.add('on');
-    $('#camTs').textContent=fT(new Date());
-  }catch(e){camWrap.classList.add('off')}
-  /* लोकेशन */
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(p=>{
-      gpos=p;$('#geoLine').textContent='लोकेशन मिळाली: '+p.coords.latitude.toFixed(5)+'° N · '+p.coords.longitude.toFixed(5)+'° E · ±'+Math.round(p.coords.accuracy)+'मी';
-      $('#confirmBtn').disabled=false;
-    },err=>{
-      sim=true;const la=LAT0+(Math.random()-.5)*.06,lo=LNG0+(Math.random()-.5)*.06;
-      gpos={coords:{latitude:la,longitude:lo,accuracy:15}};
-      $('#geoLine').classList.add('warn');
-      $('#geoLine').textContent='लोकेशन परवानगी नाकारली ('+err.message+') — सिम्युलेटेड निर्देशांक वापरतोय';
-      $('#confirmBtn').disabled=false;
-    },{enableHighAccuracy:true,timeout:8000});
-  }else{
-    sim=true;gpos={coords:{latitude:LAT0,longitude:LNG0,accuracy:99}};
-    $('#geoLine').textContent='GPS समर्थित नाही — सिम्युलेटेड निर्देशांक';$('#confirmBtn').disabled=false;
-  }
-});
- $('#shotBtn').addEventListener('click',()=>{
-  const cv=document.createElement('canvas');cv.width=480;cv.height=360;
-  const cx=cv.getContext('2d');
-  if(camVid.videoWidth){cx.drawImage(camVid,0,0,cv.width,cv.height)}
-  else{cx.fillStyle='#0a120d';cx.fillRect(0,0,cv.width,cv.height);
-    cx.fillStyle='#7d8f84';cx.font='20px Mukta';cx.textAlign='center';
-    cx.fillText('कॅमेरा नाही — फोटोशिवाय चेक-इन',cv.width/2,cv.height/2)}
-  shot=cv.toDataURL('image/jpeg',.82);
-  camShot.src=shot;camWrap.classList.remove('on');camWrap.classList.add('shot');
-  $('#shotBtn').textContent='पुन्हा काढा';
-});
- $('#confirmBtn').addEventListener('click',()=>{
-  const la=gpos.coords.latitude,lo=gpos.coords.longitude,ac=Math.round(gpos.coords.accuracy);
-  /* तुमची पिन नकाशा-मध्यभागी; खरे निर्देशांक वाचनात */
-  youPin.hidden=false;youPin.style.left='50%';youPin.style.top='46%';
-  addEvent('चेक-इन: <b style="color:var(--grn)">तुम्ही</b> — '+la.toFixed(5)+'°N '+lo.toFixed(5)+'°E (±'+ac+'मी'+(sim?' · सिम्युलेटेड':' · GPS')+')','info',shot);
-  checkins++;$('#stCheck').textContent=checkins.toLocaleString('en-IN');
-  toast('चेक-इन नोंदवला — नकाशावर तुमची पिन दिसतेय');
-  closeModal();
-});
-
-/* ============ सुरुवात ============ */
-countUp($('#stTotal'),1248);
- $('#stCheck').textContent=checkins.toLocaleString('en-IN');
-/* सुरुवातीचे लॉग एंट्री */
-const seed=[['कन्सोल बूट पूर्ण — सर्व सेन्सर्स ऑनलाइन','info'],['चेक-इन पूर्ण — बाणेर','info'],
- ['डिव्हाइस अनलॉक — OnePlus Nord 3','info'],['लोकेशन अपडेट — सायली देशमुख (कोथरूड)','info'],
- ['ॲप सेशन सुरू — वेदांत शिंदे','info']];
-seed.reverse().forEach(([tx,ty],i)=>{const d=new Date(Date.now()-(i+1)*45000);evts.push({t:d,text:tx,type:ty})});
-evts.reverse();renderRoster();select('USR-1101');
-addEvent('कन्सोल लाईव्ह — 12 यूजर्स ट्रॅकवर','info');
+function startWatch(){
+  if(T.watch!=null)navigator.geolocation.clearWatch(T.watch);
+  T.watch=navigator.geolocation.watchPosition(onPos,onPosErr,{enableHighAccuracy:true,maximumAge:2000,timeout:25000});
+  /* खीळ बसली तर स्वतःच पुन्हा सुरू */
+  clearInterval(T.dog);
+  T.dog=setInterval(()=>{if(T.la!==null&&Date.now()-T.lastSent>45000)startWatch()},30000);
+}
+function onPos(p){
+  const{latitude:la,longitude:ln,accuracy:ac,speed:sp}=p.coords,now=Date.now();
+  $('#shCoord').textContent=la.toFixed(5)+'° · '+ln.toFixed(5)+'°';
+  $('#shAcc').textContent='± '+Math.round(ac||0)+' मी';$('#shCnt').textContent=T.cnt;
+  $('#shLast').textContent=fT(now);
+  /* स्वतःचा नकाशा */
+  if(!T.mapReady){T.mapReady=true;MapLayer.init($('#trackMap'),ok=>{
+    if(ok){MapLayer.marker('me',la,ln,'#35f08c','तुम्ही',()=>{});MapLayer.focus(la,ln,16)}})}
+  else if(MapLayer.mode){MapLayer.marker('me',la,ln,'#35f08c','तुम्ही',()=>{})}
+  /* थ्रॉटल: किमान ५ सेकंद किंवा १५ मीटर हालचाल */
+  const moved=T.la===null||hav(T.la,T.ln,la,ln)>15;
+  if(now-T.lastSent<5000&&!moved)return;
+  T.lastSent=now;T.la=la;T.ln=ln;T.cnt++;
+  $('#shCnt').textContent=T.cnt;$('#shLast').textContent=fT(now);
+  T.ref.child('loc').set({la,ln,ac,sp:sp||0,ts:now});
+  T.ref.child('path').push({la,ln,ts:now});
+  if(MapLayer.mode&&T.trail.length){MapLayer.trail('me',T.trail,'#35f08c')}
+}
+function onPosErr(e){
+  $('#shErr').textContent={
+    1:'❌ परवानगी नाकारली. ब्राउझर अ‍ॅड्रेसबारच्या लॉक-आयकॉनवर क्लिक करून Location → Allow करा, मग पान reload करा.',
+    2:'लोकेशन उपलब्ध नाही — GPS चालू केला आहे का? बाहेर किंवा खिडकीजवळ जा.',
+    3:'लोकेशन लागतेय — पुन्हा प्रयत्न करतोय…'}[e.code]||'लोकेशन चूक: '+e.message;
+  if(e.code===3)startWatch();
+}
+function stopShare(manual){
+  if(T.watch!=null){navigator.geolocation.clearWatch(T.watch);T.watch=null}
+  clearInterval(T.dog);
+  if(T.ref)T.ref.update({stopped:true,active:false});
+  $('#shErr').textContent='';$('#shareCard').hidden=true;$('#consentCard').hidden=false;
+  if(manual)toast('शेअरिंग थांबवले ✓');
+}
 </script>
 </body>
 </html>
